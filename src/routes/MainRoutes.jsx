@@ -97,10 +97,6 @@ const MainRoutes = {
       ]
     },
     {
-      path: '/contact-book',
-      element: ''
-    },
-    {
       path: '/settings',
       children: [
         {
