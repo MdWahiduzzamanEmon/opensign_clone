@@ -10,7 +10,7 @@ const icons = { IconDashboard };
 
 const dashboard = {
   id: 'dashboard',
-  title: 'Dashboard',
+  // title: 'Dashboard',
   type: 'group',
   children: [
     {
@@ -18,7 +18,7 @@ const dashboard = {
       title: 'Dashboard',
       type: 'item',
       url: '/dashboard',
-      // icon: icons.IconDashboard,
+      icon: icons.IconDashboard,
       breadcrumbs: false
     }
 

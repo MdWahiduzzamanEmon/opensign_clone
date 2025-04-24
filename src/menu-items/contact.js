@@ -8,7 +8,7 @@ const icons = { IconDashboard };
 
 const contact = {
   id: 'contact',
-  title: 'Contact',
+  //   title: 'Contact',
   type: 'group',
   icon: icons.IconDashboard,
   children: [

@@ -8,7 +8,7 @@ const icons = { IconDashboard };
 
 const users = {
   id: 'Users',
-  title: 'Users',
+  //   title: 'Users',
   type: 'group',
   icon: icons.IconDashboard,
   children: [
@@ -16,8 +16,8 @@ const users = {
       id: 'users',
       title: 'Users',
       type: 'item',
-      url: '/users',
-    //   icon: icons.IconDashboard
+      url: '/users'
+      //   icon: icons.IconDashboard
     }
   ]
 };
