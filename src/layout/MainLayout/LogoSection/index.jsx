@@ -23,17 +23,17 @@ export default function LogoSection() {
         color: 'text.primary',
         '& svg': {
           width: 40,
-          height: 40
+          height: 40,
         },
         '& h2': {
           fontSize: '1.5rem',
           fontWeight: 700,
-          marginLeft: 1
+          marginLeft: 1,
         },
         '& small': {
           fontSize: '0.875rem',
-          marginLeft: 1
-        }
+          marginLeft: 1,
+        },
       }}
       color="inherit"
       underline="none"

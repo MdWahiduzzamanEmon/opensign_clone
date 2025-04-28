@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
+  allConfig: js.configs.all,
 });
 
 export default [
@@ -24,7 +24,7 @@ export default [
       prettier,
       react,
       'react-hooks': reactHooks,
-      'jsx-a11y': jsxA11y
+      'jsx-a11y': jsxA11y,
     },
 
     languageOptions: {
@@ -32,15 +32,15 @@ export default [
       sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
-          jsx: true // ✅ Enable JSX parsing
-        }
-      }
+          jsx: true, // ✅ Enable JSX parsing
+        },
+      },
     },
 
     settings: {
       react: {
-        version: 'detect' // ✅ Detect the installed React version
-      }
+        version: 'detect', // ✅ Detect the installed React version
+      },
     },
 
     rules: {
@@ -57,17 +57,17 @@ export default [
         'warn',
         {
           bracketSpacing: true,
-          printWidth: 140,
+          printWidth: 100,
           singleQuote: true,
-          trailingComma: 'none',
+          trailingComma: 'all',
           tabWidth: 2,
-          useTabs: false
-        }
-      ]
-    }
+          useTabs: false,
+        },
+      ],
+    },
   },
   {
     ignores: ['node_modules/**'],
-    files: ['src/**/*.{js,jsx}']
-  }
+    files: ['src/**/*.{js,jsx}'],
+  },
 ];

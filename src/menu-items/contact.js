@@ -16,10 +16,10 @@ const contact = {
       id: 'contact',
       title: 'Contact',
       type: 'item',
-      url: '/contact'
+      url: '/contact',
       //   icon: icons.IconDashboard
-    }
-  ]
+    },
+  ],
 };
 
 export default contact;

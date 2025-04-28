@@ -4,6 +4,8 @@ import CInput from '../../../ui-component/Input/Input';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTranslation } from 'react-i18next';
 import CDropdownField from '../../../ui-component/DropdownField/DropdownField';
+import CustomDialog from '../../../ui-component/CustomDialog/CustomDialog';
+import AddContact from '../../AddContact/AddContact';
 
 const TITLE = 'Request Signature';
 const SUBTITLE = 'requestsign-description';
@@ -17,31 +19,32 @@ const RequestSignature = () => {
   const demoContacts = [
     {
       label: 'John Doe',
-      value: '123123'
+      value: '123123',
     },
     {
       label: 'Jane Smith',
-      value: '456456'
+      value: '456456',
     },
     {
       label: 'Michael Johnson',
-      value: '789789'
+      value: '789789',
     },
     {
       label: 'Emily Davis',
-      value: '101010'
+      value: '101010',
     },
     {
       label: 'Robert Brown',
-      value: '111111'
+      value: '111111',
     },
     {
       label: 'Olivia Wilson',
-      value: '222222'
-    }
+      value: '222222',
+    },
   ];
 
   const [selectedContact, setSelectedContact] = useState(null);
+  const [open, setOpen] = useState(false);
 
   console.log('Selected contact:', selectedContact);
 
@@ -49,7 +52,13 @@ const RequestSignature = () => {
     <>
       <MainCard title={t(TITLE)} subTitle={t(SUBTITLE)}>
         <Box>
-          <CInput type="file" label="File (pdf, png, jpg, jpeg)" onChange={setFile} required accept=".pdf, .png, .jpg, .jpeg" />
+          <CInput
+            type="file"
+            label="File (pdf, png, jpg, jpeg)"
+            onChange={setFile}
+            required
+            accept=".pdf, .png, .jpg, .jpeg"
+          />
 
           <CInput label="Document title" value={title} onChange={setTitle} required />
 
@@ -60,12 +69,18 @@ const RequestSignature = () => {
             onChange={setSelectedContact}
             placeholder="Select Contact"
             required
-            onAddClick={() => {}}
+            onAddClick={() => setOpen(true)}
             hint
             hintText=""
           />
 
-          <CInput label="Note" value={note} onChange={setNote} required placeholder="Note to myself" />
+          <CInput
+            label="Note"
+            value={note}
+            onChange={setNote}
+            required
+            placeholder="Note to myself"
+          />
 
           {/* Select folder section here (custom component) */}
 
@@ -80,6 +95,17 @@ const RequestSignature = () => {
           </Box>
         </Box>
       </MainCard>
+
+      {/* // Custom dialog for adding a new contact */}
+      <CustomDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Add contact"
+        successButtonText="Submit"
+        cancelButtonText="Reset"
+      >
+        <AddContact />
+      </CustomDialog>
     </>
   );
 };

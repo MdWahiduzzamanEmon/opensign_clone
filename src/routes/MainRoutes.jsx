@@ -16,7 +16,9 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 // const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 
 const SignYourself = Loadable(lazy(() => import('../components/Sign/SignYourself/SignYourself')));
-const RequestSignature = Loadable(lazy(() => import('../components/Sign/RequestSignature/RequestSignature')));
+const RequestSignature = Loadable(
+  lazy(() => import('../components/Sign/RequestSignature/RequestSignature')),
+);
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -30,33 +32,33 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <DashboardDefault />
+      element: <DashboardDefault />,
     },
     {
       path: 'dashboard',
       children: [
         {
           path: '',
-          element: <DashboardDefault />
-        }
-      ]
+          element: <DashboardDefault />,
+        },
+      ],
     },
     {
       path: 'sign',
       children: [
         {
           path: 'sign-your-self',
-          element: <SignYourself />
+          element: <SignYourself />,
         },
         {
           path: 'request-signature',
-          element: <RequestSignature />
+          element: <RequestSignature />,
         },
         {
           path: 'need-your-sign',
-          element: ''
-        }
-      ]
+          element: '',
+        },
+      ],
     },
 
     // url: '/templates/create-template',
@@ -65,65 +67,65 @@ const MainRoutes = {
       children: [
         {
           path: 'create-template',
-          element: ''
+          element: '',
         },
         {
           path: 'manage-templates',
-          element: ''
-        }
-      ]
+          element: '',
+        },
+      ],
     },
     {
       path: 'signature_status',
       children: [
         {
           path: 'in-progress',
-          element: ''
+          element: '',
         },
         {
           path: 'completed',
-          element: ''
+          element: '',
         },
         {
           path: 'Drafts',
-          element: ''
+          element: '',
         },
         {
           path: 'Declined',
-          element: ''
+          element: '',
         },
         {
           path: 'Expired',
-          element: ''
-        }
-      ]
+          element: '',
+        },
+      ],
     },
     {
       path: '/settings',
       children: [
         {
           path: 'my-signature',
-          element: ''
+          element: '',
         },
         {
           path: 'Preferences',
-          element: ''
+          element: '',
         },
         {
           path: 'mail-templates',
-          element: ''
-        }
-      ]
+          element: '',
+        },
+      ],
     },
     {
       path: 'users',
-      element: ''
+      element: '',
     },
     {
       path: 'contact',
-      element: ''
-    }
-  ]
+      element: '',
+    },
+  ],
 };
 
 export default MainRoutes;
