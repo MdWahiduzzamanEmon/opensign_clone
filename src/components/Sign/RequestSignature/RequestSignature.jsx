@@ -71,7 +71,7 @@ const RequestSignature = () => {
             required
             onAddClick={() => setOpen(true)}
             hint
-            hintText=""
+            hintText={t('signers-help')}
           />
 
           <CInput
@@ -85,11 +85,11 @@ const RequestSignature = () => {
           {/* Select folder section here (custom component) */}
 
           <Box display="flex" mt={4} gap={2}>
-            <Button variant="contained" disabled>
+            <Button variant="contained" disabled color="secondary">
               {t('next')}
             </Button>
 
-            <Button variant="text" sx={{ textTransform: 'none', color: '#000' }}>
+            <Button variant="outlined" color="error" onClick={() => setOpen(false)}>
               {t('cancel')}
             </Button>
           </Box>

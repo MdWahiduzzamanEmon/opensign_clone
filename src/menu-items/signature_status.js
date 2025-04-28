@@ -16,34 +16,39 @@ const signature_status = {
       id: 'In Progress',
       title: 'In Progress',
       type: 'item',
-      url: '/signature_status/in-progress'
+      url: '/signature_status/in-progress',
+      breadcrumbs: false,
       //   icon: icons.IconBrandChrome
     },
     {
       id: 'Completed',
       title: 'Completed',
       type: 'item',
-      url: '/signature_status/completed'
+      url: '/signature_status/completed',
+      breadcrumbs: false,
     },
     {
       id: 'Drafts',
       title: 'Drafts',
       type: 'item',
-      url: '/signature_status/drafts'
+      url: '/signature_status/drafts',
+      breadcrumbs: false,
     },
     {
       id: 'Declined',
       title: 'Declined',
       type: 'item',
-      url: '/signature_status/declined'
+      url: '/signature_status/declined',
+      breadcrumbs: false,
     },
     {
       id: 'Expired',
       title: 'Expired',
       type: 'item',
-      url: '/signature_status/expired'
-    }
-  ]
+      url: '/signature_status/expired',
+      breadcrumbs: false,
+    },
+  ],
 };
 
 export default signature_status;

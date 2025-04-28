@@ -49,7 +49,7 @@ const CustomDialog = ({
             <Button variant="outlined" color="error" onClick={() => setOpen(false)}>
               {cancelButtonText}
             </Button>
-            <Button variant="contained" onClick={() => setOpen(false)}>
+            <Button variant="contained" onClick={() => setOpen(false)} color="secondary">
               {successButtonText}
             </Button>
           </>

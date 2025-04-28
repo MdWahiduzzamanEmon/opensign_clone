@@ -4,8 +4,9 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoutes from '../components/PrivateRoutes/PrivateRoutes';
-// import RequestSignature from '../components/Sign/RequestSignature/RequestSignature';
-// import SignYourself from '../components/SignYourself/SignYourself';
+// import Drafts from '../components/SignatureStatus/Drafts/Drafts';
+// import Declined from '../components/SignatureStatus/Declined/Declined';
+// import Expired from '../components/SignatureStatus/Expired/Expired';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -19,6 +20,14 @@ const SignYourself = Loadable(lazy(() => import('../components/Sign/SignYourself
 const RequestSignature = Loadable(
   lazy(() => import('../components/Sign/RequestSignature/RequestSignature')),
 );
+const NeedYourSign = Loadable(lazy(() => import('../components/Sign/NeedYourSign/NeedYourSign')));
+const InProgress = Loadable(
+  lazy(() => import('../components/SignatureStatus/InProgress/InProgress')),
+);
+const Completed = Loadable(lazy(() => import('../components/SignatureStatus/Completed/Completed')));
+const Drafts = Loadable(lazy(() => import('../components/SignatureStatus/Drafts/Drafts')));
+const Declined = Loadable(lazy(() => import('../components/SignatureStatus/Declined/Declined')));
+const Expired = Loadable(lazy(() => import('../components/SignatureStatus/Expired/Expired')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -56,7 +65,7 @@ const MainRoutes = {
         },
         {
           path: 'need-your-sign',
-          element: '',
+          element: <NeedYourSign />,
         },
       ],
     },
@@ -80,23 +89,23 @@ const MainRoutes = {
       children: [
         {
           path: 'in-progress',
-          element: '',
+          element: <InProgress />,
         },
         {
           path: 'completed',
-          element: '',
+          element: <Completed />,
         },
         {
           path: 'Drafts',
-          element: '',
+          element: <Drafts />,
         },
         {
           path: 'Declined',
-          element: '',
+          element: <Declined />,
         },
         {
           path: 'Expired',
-          element: '',
+          element: <Expired />,
         },
       ],
     },

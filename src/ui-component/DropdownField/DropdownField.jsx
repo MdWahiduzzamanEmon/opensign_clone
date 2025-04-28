@@ -1,5 +1,13 @@
 import React from 'react';
-import { Autocomplete, TextField, Typography, Box, IconButton, useTheme } from '@mui/material';
+import {
+  Autocomplete,
+  TextField,
+  Typography,
+  Box,
+  IconButton,
+  useTheme,
+  Popover,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { INPUT_BORDER_RADIUS } from '../../config';
 
@@ -13,9 +21,19 @@ const CDropdownField = ({
   onAddClick,
   noOptionsText = 'Contact not found',
   hint,
-  hintText = ''
+  hintText = '',
 }) => {
   const theme = useTheme();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
     <Box mb={2}>
@@ -25,28 +43,58 @@ const CDropdownField = ({
             {label}
             {required && <span style={{ color: 'red' }}> *</span>}
           </Typography>
-          {hint && (
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 18,
-                height: 18,
-                borderRadius: '50%',
-                backgroundColor: '#e1e6ee',
-                fontSize: '12px',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'cyan',
-                  color: 'white',
-                  transition: 'all',
-                  transitionDuration: 'revert-layer'
-                }
-              }}
-            >
-              ?
-            </Box>
+          {hint && hintText && (
+            <>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  backgroundColor: '#e1e6ee',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'cyan',
+                    color: 'white',
+                    transition: 'all',
+                    transitionDuration: 'revert-layer',
+                  },
+                }}
+                aria-owns={open ? 'mouse-over-popover' : undefined}
+                aria-haspopup="true"
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+              >
+                ?
+              </Box>
+
+              <Popover
+                id="mouse-over-popover"
+                sx={{
+                  pointerEvents: 'none',
+                  whiteSpace: 'wrap',
+                  width: '60%',
+                  maxWidth: '700px',
+                }}
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+                onClose={handlePopoverClose}
+                disableRestoreFocus
+              >
+                <Typography sx={{ p: 1, fontSize: '12px' }}>{hintText}</Typography>
+              </Popover>
+            </>
           )}
         </Box>
       )}
@@ -71,30 +119,30 @@ const CDropdownField = ({
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
                     borderColor: '#e1e6ee',
-                    borderRadius: INPUT_BORDER_RADIUS // move it here
+                    borderRadius: INPUT_BORDER_RADIUS, // move it here
                   },
                   '&:hover fieldset': {
-                    borderColor: theme.palette.secondary.main
+                    borderColor: theme.palette.secondary.main,
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.secondary.main
-                  }
-                }
+                    borderColor: theme.palette.secondary.main,
+                  },
+                },
               }}
               InputProps={{
                 ...params.InputProps,
                 style: {
                   borderRadius: 25,
-                  fontSize: '14px'
+                  fontSize: '14px',
                 },
-                endAdornment: params.InputProps.endAdornment
+                endAdornment: params.InputProps.endAdornment,
               }}
             />
           )}
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '25px'
-            }
+              borderRadius: '25px',
+            },
           }}
         />
 
@@ -108,8 +156,8 @@ const CDropdownField = ({
               width: '40px',
               height: '40px',
               '&:hover': {
-                backgroundColor: '#e0e0e0'
-              }
+                backgroundColor: '#e0e0e0',
+              },
             }}
           >
             <AddIcon />
