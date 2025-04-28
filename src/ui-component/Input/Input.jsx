@@ -1,50 +1,100 @@
 import React from 'react';
-import TextField from '@mui/material/TextField';
+import { TextField, Typography, Box, Button, useTheme } from '@mui/material';
+import { INPUT_BORDER_RADIUS } from '../../config';
 
 const CInput = ({
+  type = 'text',
   label,
   value,
   onChange,
   required = false,
   disabled = false,
-  type = 'text',
   id,
-  onInvalidMessage = 'This field is required'
+  placeholder = '',
+  multiline = false,
+  rows = 3,
+  accept
 }) => {
   const handleChange = (e) => {
-    const cleanedValue = e.target.value?.toLowerCase()?.replace(/\s/g, '');
-    onChange(cleanedValue);
+    if (type === 'file') {
+      onChange(e.target.files[0]);
+    } else {
+      onChange(e.target.value);
+    }
   };
-
-  const handleInvalid = (e) => {
-    e.target.setCustomValidity(onInvalidMessage);
-  };
-
-  const handleInput = (e) => {
-    e.target.setCustomValidity('');
-  };
+  const theme = useTheme();
 
   return (
-    <TextField
-      id={id}
-      label={<>{label}</>}
-      type={type}
-      value={value}
-      onChange={handleChange}
-      onInvalid={handleInvalid}
-      onInput={handleInput}
-      required={required}
-      disabled={disabled}
-      fullWidth
-      size="small"
-      variant="outlined"
-      InputLabelProps={{ shrink: true }}
-      sx={{
-        '& .MuiInputBase-input': {
-          fontSize: '12px'
-        }
-      }}
-    />
+    <Box mb={2}>
+      {label && (
+        <Typography variant="body2" fontWeight="bold" mb={0.5}>
+          {label}
+          {required && <span style={{ color: 'red' }}> *</span>}
+        </Typography>
+      )}
+      {type === 'file' ? (
+        <Box
+          id={id}
+          component="label"
+          sx={{
+            borderRadius: INPUT_BORDER_RADIUS,
+            border: '1px solid #e1e6ee',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: '10px'
+          }}
+        >
+          <Button
+            variant="text"
+            component="label"
+            color="inherit"
+            size="small"
+            sx={{
+              backgroundColor: '#e1e6ee',
+              textTransform: 'uppercase',
+              borderTopLeftRadius: INPUT_BORDER_RADIUS,
+              borderBottomLeftRadius: INPUT_BORDER_RADIUS,
+              padding: '5px 20px'
+            }}
+          >
+            Choose File
+            <input hidden type="file" accept={accept} onChange={handleChange} disabled={disabled} />
+          </Button>
+          <small>No file chosen</small>
+        </Box>
+      ) : (
+        <TextField
+          id={id}
+          type={type}
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          required={required}
+          fullWidth
+          multiline={multiline}
+          rows={rows}
+          size="small"
+          variant="outlined"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#e1e6ee',
+                borderRadius: INPUT_BORDER_RADIUS // move it here
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.secondary.main
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.secondary.main
+              }
+            }
+          }}
+        />
+      )}
+    </Box>
   );
 };
 

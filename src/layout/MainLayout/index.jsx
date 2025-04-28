@@ -19,10 +19,12 @@ import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { useTranslation } from 'react-i18next';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
 export default function MainLayout() {
+  const { i18n } = useTranslation();
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -37,6 +39,13 @@ export default function MainLayout() {
   useEffect(() => {
     downMD && handlerDrawerOpen(false);
   }, [downMD]);
+
+  useEffect(() => {
+    const language = localStorage.getItem('i18nextLng');
+    if (language) {
+      i18n.changeLanguage(language);
+    }
+  }, [i18n]);
 
   // horizontal menu-list bar : drawer
 
@@ -60,7 +69,7 @@ export default function MainLayout() {
           {/* breadcrumb */}
           <Breadcrumbs />
           <Outlet />
-          <Footer />
+          {/* <Footer /> */}
         </Box>
       </MainContentStyled>
       {/* <Customization /> */}
