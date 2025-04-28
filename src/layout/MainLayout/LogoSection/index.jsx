@@ -5,7 +5,8 @@ import Link from '@mui/material/Link';
 
 // project imports
 // import { DASHBOARD_PATH } from 'config';
-import Logo from 'ui-component/Logo';
+// import Logo from 'ui-component/Logo';
+import { APP_NAME } from '../../../config';
 
 // ==============================|| MAIN LOGO ||============================== //
 
@@ -38,7 +39,7 @@ export default function LogoSection() {
       underline="none"
     >
       {/* <Logo /> */}
-      <h2>OpenSign</h2>
+      <h2>{APP_NAME}</h2>
     </Link>
   );
 }

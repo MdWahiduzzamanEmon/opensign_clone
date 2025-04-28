@@ -62,9 +62,9 @@ export default function Register() {
             </Grid>
           </Grid>
         </Grid>
-        <Grid sx={{ px: 3, mb: 3, mt: 1 }} size={12}>
+        {/* <Grid sx={{ px: 3, mb: 3, mt: 1 }} size={12}>
           <AuthFooter />
-        </Grid>
+        </Grid> */}
       </Grid>
     </AuthWrapper1>
   );

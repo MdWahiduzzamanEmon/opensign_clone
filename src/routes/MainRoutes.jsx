@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoutes from '../components/PrivateRoutes/PrivateRoutes';
+// import SignYourself from '../components/SignYourself/SignYourself';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -13,8 +14,7 @@ const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')
 const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 
-// sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const SignYourself = Loadable(lazy(() => import('../components/Sign/SignYourself/SignYourself')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -44,7 +44,7 @@ const MainRoutes = {
       children: [
         {
           path: 'sign-your-self',
-          element: ''
+          element: <SignYourself />
         },
         {
           path: 'request-signature',

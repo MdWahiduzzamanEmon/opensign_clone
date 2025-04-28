@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 
 // project imports
 import useConfig from 'hooks/useConfig';
+import { ListSubheader } from '@mui/material';
 
 // constant
 const headerStyle = {
@@ -28,6 +29,7 @@ const MainCard = forwardRef(function MainCard(
     secondary,
     shadow,
     sx = {},
+    subTitle,
     title,
     ...others
   },
@@ -46,13 +48,26 @@ const MainCard = forwardRef(function MainCard(
         ':hover': {
           boxShadow: boxShadow ? shadow || defaultShadow : 'inherit'
         },
+
         ...sx
       }}
     >
       {/* card header and action */}
-      {!darkTitle && title && <CardHeader sx={{ ...headerStyle, ...headerSX }} title={title} action={secondary} />}
+      {!darkTitle && title && <CardHeader sx={{ ...headerStyle, ...headerSX, padding: '10px 16px' }} title={title} action={secondary} />}
       {darkTitle && title && (
         <CardHeader sx={{ ...headerStyle, ...headerSX }} title={<Typography variant="h3">{title}</Typography>} action={secondary} />
+      )}
+      {subTitle && (
+        <small
+          style={{
+            padding: '0 16px',
+            marginBottom: '8px',
+            display: 'block',
+            color: mode === 'dark' ? '#fff' : 'gray'
+          }}
+        >
+          {subTitle}
+        </small>
       )}
 
       {/* content & header divider */}

@@ -5,4 +5,5 @@ const config = {
   borderRadius: 8
 };
 
+export const APP_NAME = 'Doxigner';
 export default config;

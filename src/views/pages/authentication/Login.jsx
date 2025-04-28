@@ -64,9 +64,9 @@ export default function Login() {
             </Grid>
           </Grid>
         </Grid>
-        <Grid sx={{ px: 3, my: 3 }} size={12}>
+        {/* <Grid sx={{ px: 3, my: 3 }} size={12}>
           <AuthFooter />
-        </Grid>
+        </Grid> */}
       </Grid>
     </AuthWrapper1>
   );
