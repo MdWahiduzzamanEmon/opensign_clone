@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import CDropdownField from '../../../ui-component/DropdownField/DropdownField';
 import CustomDialog from '../../../ui-component/CustomDialog/CustomDialog';
 import AddContact from '../../AddContact/AddContact';
+import AdvancedOption from '../../AdvancedOption/AdvancedOption';
+import { DEMO_CONTACTS } from '../../../constant/constant';
 
 const TITLE = 'Request Signature';
 const SUBTITLE = 'requestsign-description';
@@ -16,32 +18,6 @@ const RequestSignature = () => {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
-  const demoContacts = [
-    {
-      label: 'John Doe',
-      value: '123123',
-    },
-    {
-      label: 'Jane Smith',
-      value: '456456',
-    },
-    {
-      label: 'Michael Johnson',
-      value: '789789',
-    },
-    {
-      label: 'Emily Davis',
-      value: '101010',
-    },
-    {
-      label: 'Robert Brown',
-      value: '111111',
-    },
-    {
-      label: 'Olivia Wilson',
-      value: '222222',
-    },
-  ];
 
   const [selectedContact, setSelectedContact] = useState(null);
   const [open, setOpen] = useState(false);
@@ -64,7 +40,7 @@ const RequestSignature = () => {
 
           <CDropdownField
             label="Select Contact"
-            options={demoContacts}
+            options={DEMO_CONTACTS}
             value={selectedContact}
             onChange={setSelectedContact}
             placeholder="Select Contact"
@@ -81,6 +57,10 @@ const RequestSignature = () => {
             required
             placeholder="Note to myself"
           />
+
+          <section>
+            <AdvancedOption />
+          </section>
 
           {/* Select folder section here (custom component) */}
 
