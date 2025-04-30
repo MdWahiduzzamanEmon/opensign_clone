@@ -4,9 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoutes from '../components/PrivateRoutes/PrivateRoutes';
-// import Drafts from '../components/SignatureStatus/Drafts/Drafts';
-// import Declined from '../components/SignatureStatus/Declined/Declined';
-// import Expired from '../components/SignatureStatus/Expired/Expired';
+// import MailTemplates from '../components/MailTemplates/MailTemplates';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -28,6 +26,10 @@ const Completed = Loadable(lazy(() => import('../components/SignatureStatus/Comp
 const Drafts = Loadable(lazy(() => import('../components/SignatureStatus/Drafts/Drafts')));
 const Declined = Loadable(lazy(() => import('../components/SignatureStatus/Declined/Declined')));
 const Expired = Loadable(lazy(() => import('../components/SignatureStatus/Expired/Expired')));
+const ManageSign = Loadable(lazy(() => import('../components/Settings/ManageSign/ManageSign')));
+const Preferences = Loadable(lazy(() => import('../components/Preferences/Preferences')));
+
+const MailTemplates = Loadable(lazy(() => import('../components/MailTemplates/MailTemplates')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -71,19 +73,7 @@ const MainRoutes = {
     },
 
     // url: '/templates/create-template',
-    {
-      path: 'templates',
-      children: [
-        {
-          path: 'create-template',
-          element: '',
-        },
-        {
-          path: 'manage-templates',
-          element: '',
-        },
-      ],
-    },
+
     {
       path: 'signature_status',
       children: [
@@ -114,15 +104,15 @@ const MainRoutes = {
       children: [
         {
           path: 'my-signature',
-          element: '',
+          element: <ManageSign />,
         },
         {
           path: 'Preferences',
-          element: '',
+          element: <Preferences />,
         },
         {
           path: 'mail-templates',
-          element: '',
+          element: <MailTemplates />,
         },
       ],
     },

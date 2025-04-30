@@ -8,9 +8,10 @@ const CRadioGroup = ({
   onChange,
   disabledOptions = [],
   row = false,
+  ...rest
 }) => {
   return (
-    <FormControl>
+    <FormControl  {...rest}>
       <FormLabel
         component="legend"
         color="secondary"

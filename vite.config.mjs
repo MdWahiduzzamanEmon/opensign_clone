@@ -14,18 +14,19 @@ export default defineConfig(({ mode }) => {
       open: true,
       // this sets a default port to 3000
       port: PORT,
-      host: true
+      host: true,
     },
     build: {
-      chunkSizeWarningLimit: 1600
+      chunkSizeWarningLimit: 1600,
     },
     preview: {
       open: true,
-      host: true
+      host: true,
     },
     define: {
-      global: 'window'
+      global: 'window',
     },
+    optimizeDeps: { include: ['lucide-react'] },
     resolve: {
       alias: {
         // { find: '', replacement: path.resolve(__dirname, 'src') },
@@ -41,10 +42,10 @@ export default defineConfig(({ mode }) => {
         //   find: 'assets',
         //   replacement: path.join(process.cwd(), 'src/assets')
         // },
-        '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs'
-      }
+        '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
+      },
     },
     base: API_URL,
-    plugins: [react(), jsconfigPaths()]
+    plugins: [react(), jsconfigPaths()],
   };
 });

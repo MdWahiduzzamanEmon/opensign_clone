@@ -23,7 +23,7 @@ const AdvancedOption = () => {
         overflow={'hidden'}
         whiteSpace={'nowrap'}
       >
-        Advanced Options
+        {open ? 'Hide Advanced Options' : 'Advanced Options'}
       </Typography>
       <Typography variant="caption" gutterBottom sx={{ display: 'block' }}>
         Click to toggle advanced options

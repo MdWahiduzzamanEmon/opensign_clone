@@ -12,7 +12,7 @@ import {
 const CBasicTable = ({ columns = [], rows = [], tableProps = {}, sx = {} }) => {
   return (
     <TableContainer component={Paper} sx={{ ...sx }}>
-      <Table {...tableProps}>
+      <Table {...tableProps} size="small">
         <TableHead>
           <TableRow>
             {columns.map((col) => (

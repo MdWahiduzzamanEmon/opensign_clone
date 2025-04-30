@@ -7,6 +7,7 @@ import router from 'routes';
 import NavigationScroll from 'layout/NavigationScroll';
 
 import ThemeCustomization from 'themes';
+import 'react-quill/dist/quill.snow.css';
 
 // auth provider
 

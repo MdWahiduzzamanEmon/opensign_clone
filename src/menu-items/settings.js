@@ -16,23 +16,25 @@ const settings = {
       id: 'my-signature',
       title: 'My Signature',
       type: 'item',
-      url: '/settings/my-signature'
+      url: '/settings/my-signature',
       //   icon: icons.IconBrandChrome,
-      //   breadcrumbs: false
+      breadcrumbs: false,
     },
     {
       id: 'mail-templates',
       title: 'Mail Templates',
       type: 'item',
-      url: '/settings/mail-templates'
+      url: '/settings/mail-templates',
+      breadcrumbs: false,
     },
     {
       id: 'Preferences',
       title: 'Preferences',
       type: 'item',
-      url: '/settings/preferences' //   icon: icons.IconBrandChrome
-    }
-  ]
+      url: '/settings/preferences', //   icon: icons.IconBrandChrome
+      breadcrumbs: false,
+    },
+  ],
 };
 
 export default settings;

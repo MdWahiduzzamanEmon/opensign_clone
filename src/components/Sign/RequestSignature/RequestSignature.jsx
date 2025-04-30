@@ -8,12 +8,21 @@ import CustomDialog from '../../../ui-component/CustomDialog/CustomDialog';
 import AddContact from '../../AddContact/AddContact';
 import AdvancedOption from '../../AdvancedOption/AdvancedOption';
 import { DEMO_CONTACTS } from '../../../constant/constant';
-
-const TITLE = 'Request Signature';
-const SUBTITLE = 'requestsign-description';
+import CButton from '../../../ui-component/CButton/CButton';
+import { useLocation, useNavigate } from 'react-router';
+import { ArrowBack } from '@mui/icons-material';
 
 const RequestSignature = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const query = useLocation().search;
+  // ?manageTemplate=true
+  const manageTemplate = new URLSearchParams(query)?.get('manageTemplate') || false;
+  //convert to boolean
+  const isManageTemplate = Boolean(manageTemplate);
+
+  const TITLE = isManageTemplate ? 'New Template' : 'Request Signature';
+  const SUBTITLE = 'requestsign-description';
 
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
@@ -22,11 +31,26 @@ const RequestSignature = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [open, setOpen] = useState(false);
 
-  console.log('Selected contact:', selectedContact);
+  // console.log('Selected contact:', selectedContact);
 
   return (
     <>
-      <MainCard title={t(TITLE)} subTitle={t(SUBTITLE)}>
+      <MainCard
+        title={t(TITLE)}
+        subTitle={t(SUBTITLE)}
+        //if isManageTemplate is true, show the back button in secondary props
+        secondary={
+          isManageTemplate && (
+            <CButton
+              label={<ArrowBack />}
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate(-1)}
+              sx={{ marginLeft: 'auto' }}
+            />
+          )
+        }
+      >
         <Box>
           <CInput
             type="file"
@@ -65,13 +89,14 @@ const RequestSignature = () => {
           {/* Select folder section here (custom component) */}
 
           <Box display="flex" mt={4} gap={2}>
-            <Button variant="contained" disabled color="secondary">
-              {t('next')}
-            </Button>
+            <CButton disabled label={t('next')} />
 
-            <Button variant="outlined" color="error" onClick={() => setOpen(false)}>
-              {t('cancel')}
-            </Button>
+            <CButton
+              variant="outlined"
+              color="error"
+              onClick={() => setOpen(false)}
+              label={t('cancel')}
+            />
           </Box>
         </Box>
       </MainCard>
