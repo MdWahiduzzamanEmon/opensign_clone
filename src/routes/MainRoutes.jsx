@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import PrivateRoutes from '../components/PrivateRoutes/PrivateRoutes';
+// import CustomizePdfSign from '../components/Pdf/CustomizePdfSign/CustomizePdfSign';
 // import MailTemplates from '../components/MailTemplates/MailTemplates';
 
 // dashboard routing
@@ -30,6 +31,9 @@ const ManageSign = Loadable(lazy(() => import('../components/Settings/ManageSign
 const Preferences = Loadable(lazy(() => import('../components/Preferences/Preferences')));
 
 const MailTemplates = Loadable(lazy(() => import('../components/MailTemplates/MailTemplates')));
+const CustomizePdfSign = Loadable(
+  lazy(() => import('../components/Pdf/CustomizePdfSign/CustomizePdfSign')),
+);
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -68,6 +72,10 @@ const MainRoutes = {
         {
           path: 'need-your-sign',
           element: <NeedYourSign />,
+        },
+        {
+          path: 'customize-pdf-sign',
+          element: <CustomizePdfSign />,
         },
       ],
     },

@@ -26,15 +26,51 @@ import '@fontsource/poppins/600.css';
 import '@fontsource/poppins/700.css';
 
 import './i18n'; // 👈 important: load i18n once
-
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { DndProvider, TouchTransition, MouseTransition, Preview } from 'react-dnd-multi-backend';
+import DragElement from './components/Pdf/DragElement';
 // ==============================|| REACT DOM RENDER ||============================== //
+
+const HTML5toTouch = {
+  backends: [
+    {
+      id: 'html5',
+      backend: HTML5Backend,
+      transition: MouseTransition,
+    },
+    {
+      id: 'touch',
+      backend: TouchBackend,
+      options: { enableMouseEvents: true },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
+};
+
+const generatePreview = (props) => {
+  const { item, style } = props;
+  const newStyle = {
+    ...style,
+  };
+
+  return (
+    <div style={newStyle}>
+      <DragElement {...item} />
+    </div>
+  );
+};
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
   <ConfigProvider>
-    <App />
-  </ConfigProvider>
+    <DndProvider options={HTML5toTouch}>
+      <Preview>{generatePreview}</Preview>
+      <App />
+    </DndProvider>
+  </ConfigProvider>,
 );
 
 // If you want your app to work offline and load faster, you can change

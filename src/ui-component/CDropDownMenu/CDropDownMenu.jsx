@@ -8,10 +8,10 @@ import { PopupContext } from '@mui/base/Unstable_Popup';
 import { styled } from '@mui/system';
 
 // ✅ Reusable Dropdown Menu Component
-const CDropDownMenu = ({ buttonContent, items, placement = 'bottom' }) => {
+const CDropDownMenu = ({ buttonContent, items, placement = 'bottom', dataTut }) => {
   return (
     <Dropdown placement={placement}>
-      <MenuButton>{buttonContent}</MenuButton>
+      <MenuButton data-tut={dataTut}>{buttonContent}</MenuButton>
       <Menu slots={{ listbox: AnimatedListbox }}>
         {items.map((item, index) => (
           <MenuItem

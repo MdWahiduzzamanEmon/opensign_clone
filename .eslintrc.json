@@ -1,13 +1,10 @@
 {
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "node": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -22,7 +19,7 @@
     "no-empty": 0,
     "no-case-declarations": 0,
     "react/no-deprecated": 0,
-    "no-undef": 0
+    // "no-undef": "error"
   },
   "ignorePatterns": ["**/build/**", "**/*.config.js"],
   "settings": {

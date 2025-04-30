@@ -52,7 +52,7 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
       'jsx-a11y/label-has-associated-control': 'off',
       'jsx-a11y/no-autofocus': 'off',
-
+      'no-undef': 'warn',
       'prettier/prettier': [
         'warn',
         {

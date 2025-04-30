@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import CInput from '../../../ui-component/Input/Input';
 import { useTranslation } from 'react-i18next';
 import { Box, Button } from '@mui/material';
 import CButton from '../../../ui-component/CButton/CButton';
+import { useNavigate } from 'react-router';
+import { generateTitleFromFilename } from '../../../constant/constant';
 
 const TITLE = 'Sign Yourself';
 const SUBTITLE = 'signyour-self-description';
 
 const SignYourself = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
+
+  // console.log('File:', file);
+  // console.log('Title:', title);
+  // console.log('Note:', note);
+
+  useEffect(() => {
+    if (file) {
+      const res = generateTitleFromFilename(file.name);
+      setTitle(res);
+    } else {
+      setTitle('');
+    }
+  }, [file]);
 
   return (
     <>
@@ -24,6 +40,8 @@ const SignYourself = () => {
             onChange={setFile}
             required
             accept=".pdf, .png, .jpg, .jpeg"
+            file={file}
+            clearFile={() => setFile(null)}
           />
 
           <CInput label="Document title" value={title} onChange={setTitle} required />
@@ -39,7 +57,18 @@ const SignYourself = () => {
           {/* Select folder section here (custom component) */}
 
           <Box display="flex" mt={4} gap={2}>
-            <CButton disabled label={t('next')} />
+            <CButton
+              label={t('next')}
+              onClick={() => {
+                navigate('/sign/customize-pdf-sign', {
+                  state: {
+                    file,
+                    title,
+                    note,
+                  },
+                });
+              }}
+            />
 
             <CButton
               variant="outlined"
