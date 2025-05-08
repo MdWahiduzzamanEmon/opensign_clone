@@ -1,29 +1,39 @@
 import React from 'react';
-import { Box, Button, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import { useDrag } from 'react-dnd';
 
 const GetWidgetType = ({ item, widgetName }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [{ isDragging }, drag] = useDrag({
+    type: 'BOX',
+    item: { type: item.id, text: item.id },
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
 
   return (
     <Button
+      ref={drag}
       variant="outlined"
       color="primary"
       size="small"
       sx={{
-        width: { xs: 'fit-content', md: '100%' },
-        ml: { xs: '6px', md: 0 },
-        p: 0,
-        overflow: 'hidden',
+        width: '100%',
+        p: 1,
         borderWidth: '1.5px',
         textTransform: 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        opacity: isDragging ? 0.5 : 1,
+        cursor: 'grab',
+        '&:active': {
+          cursor: 'grabbing',
+        },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-        {!isMobile && <i className="fa-light fa-grip-vertical" style={{ marginLeft: 3 }}></i>}
+        <i className="fa-light fa-grip-vertical" style={{ marginLeft: 3 }}></i>
         <Box
           sx={{
             display: 'flex',
@@ -33,7 +43,7 @@ const GetWidgetType = ({ item, widgetName }) => {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            maxWidth: { xs: '100px', md: '200px' },
+            maxWidth: '200px',
           }}
         >
           <Typography

@@ -1,32 +1,26 @@
 import { useTranslation } from 'react-i18next';
-import { isMobile } from '../../config';
 import { Box } from '@mui/material';
 import GetWidgetType from './GetWidgetType/GetWidgetType';
 
 function WidgetList(props) {
   const { t } = useTranslation();
 
-  return props.updateWidgets.map((item, ind) => {
+  return props.updateWidgets.map((item, index) => {
     const widgetName = t(`widgets-name.${item.type}`);
 
     return (
-      <Box key={ind} paddingBottom={0.5}>
+      <Box key={index} paddingBottom={0.5}>
         <Box
-          data-tut="isSignatureWidget"
+          ref={item.ref}
           sx={{
             userSelect: 'none',
-            marginX: { xs: 0.25, md: 0 },
             cursor: 'grab',
+            '&:hover': {
+              opacity: 0.8,
+            },
           }}
-          onClick={() => {
-            props.addPositionOfSignature && props.addPositionOfSignature('onclick', item);
-          }}
-          ref={!isMobile && item.ref ? item.ref : null}
-          onMouseMove={(e) => !isMobile && props?.handleDivClick(e)}
-          onMouseDown={() => !isMobile && props?.handleMouseLeave()}
-          onTouchStart={(e) => !isMobile && props?.handleDivClick(e)}
         >
-          {item.ref && <GetWidgetType item={item} widgetName={widgetName} />}
+          <GetWidgetType item={item} widgetName={widgetName} />
         </Box>
       </Box>
     );

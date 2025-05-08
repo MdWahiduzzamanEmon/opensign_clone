@@ -23,11 +23,13 @@ import {
   signatureTypes,
 } from '../../../constant/constant';
 import PdfZoom from '../PdfZoom';
-import { Box } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import RenderPdf from '../RenderPdf';
 import Header from '../PdfHeader';
 import WidgetComponent from '../WidgetComponent';
 import WidgetNameModal from '../WidgetNameModal';
+import WidgetList from '../WidgetList/WidgetList';
+import Placeholder from '../Placeholder/Placeholder';
 
 const CustomizePdfSign = () => {
   const { state } = useLocation();
@@ -83,6 +85,9 @@ const CustomizePdfSign = () => {
   const [isTextSetting, setIsTextSetting] = useState(false);
   const [owner, setOwner] = useState({});
   const [widgetPositions, setWidgetPositions] = useState([]);
+  const [widget, setWidget] = useState(null);
+  const [activeWidget, setActiveWidget] = useState(null);
+  const [widgets, setWidgets] = useState([]);
 
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
@@ -100,8 +105,27 @@ const CustomizePdfSign = () => {
   const [{ isOver }, drop] = useDrop({
     accept: 'BOX',
     drop: (item, monitor) => {
-      console.log('Dropped item:', item, monitor);
-      addPositionOfSignature(item, monitor);
+      const offset = monitor.getClientOffset();
+      const containerRect = document.getElementById('pdf-container').getBoundingClientRect();
+      const x = offset.x - containerRect.left;
+      const y = offset.y - containerRect.top;
+
+      const newWidget = {
+        ...item,
+        id: Date.now(),
+        position: { x, y },
+        size: { width: 100, height: 40 },
+      };
+
+      setWidgets((prev) => [...prev, newWidget]);
+      addPositionOfSignature(
+        {
+          ...item,
+          x,
+          y,
+        },
+        monitor,
+      );
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   });
@@ -114,16 +138,12 @@ const CustomizePdfSign = () => {
   }, [drop]);
 
   const addPositionOfSignature = (item, monitor) => {
-    getSignerPos(item, monitor);
-  };
-
-  const getSignerPos = (item, monitor) => {
     const posZIndex = zIndex + 1;
     setZIndex(posZIndex);
 
     const key = randomId();
     const containerScale = getContainerScale(pdfOriginalWH, pageNumber, containerWH);
-    const dragTypeValue = item?.text ? item.text : monitor.type;
+    const dragTypeValue = item?.text ? item.text : item.type;
     const widgetWidth = defaultWidthHeight(dragTypeValue).width * containerScale;
     const widgetHeight = defaultWidthHeight(dragTypeValue).height * containerScale;
 
@@ -143,10 +163,9 @@ const CustomizePdfSign = () => {
         Height: widgetHeight / (containerScale * scale),
       };
     } else {
-      const offset = monitor.getClientOffset();
-      const containerRect = document.getElementById('container').getBoundingClientRect();
-      const x = offset.x - containerRect.left;
-      const y = offset.y - containerRect.top;
+      // Use the x and y coordinates from the drop event
+      const x = item.x;
+      const y = item.y;
 
       dropObj = {
         key,
@@ -161,25 +180,49 @@ const CustomizePdfSign = () => {
       };
     }
 
-    // Save to UI state
+    // Update widget positions state
     setWidgetPositions((prev) => [...prev, dropObj]);
 
-    // Optional: set editing UI states
+    // Update signer positions if needed
+    const updatedSignerPos = [...signerPos];
+    const currentSigner = updatedSignerPos.find((signer) => signer.Id === uniqueId);
+
+    if (currentSigner) {
+      const pagePlaceholder = currentSigner.placeHolder?.find((p) => p.pageNumber === pageNumber);
+      if (pagePlaceholder) {
+        pagePlaceholder.pos = [...(pagePlaceholder.pos || []), dropObj];
+      } else {
+        currentSigner.placeHolder = [
+          ...(currentSigner.placeHolder || []),
+          {
+            pageNumber,
+            pos: [dropObj],
+          },
+        ];
+      }
+      setSignerPos(updatedSignerPos);
+    }
+
+    // Set editing UI states
     setSelectWidgetId(key);
     setWidgetType(dragTypeValue);
     setSignKey(key);
     setCurrWidgetsDetails({});
     setWidgetName(dragTypeValue);
 
-    // Set UI flags
-    if (dragTypeValue === 'dropdown') setShowDropdown(true);
-    else if (dragTypeValue === 'checkbox') setIsCheckbox(true);
-    else if (
+    // Set UI flags based on widget type
+    if (dragTypeValue === 'dropdown') {
+      setShowDropdown(true);
+    } else if (dragTypeValue === 'checkbox') {
+      setIsCheckbox(true);
+    } else if (
       [textInputWidget, textWidget, 'name', 'company', 'job title', 'email'].includes(dragTypeValue)
     ) {
       setFontSize(12);
       setFontColor('black');
-    } else if (dragTypeValue === radioButtonWidget) setIsRadio(true);
+    } else if (dragTypeValue === radioButtonWidget) {
+      setIsRadio(true);
+    }
   };
 
   const closeTour = () => {
@@ -501,7 +544,32 @@ const CustomizePdfSign = () => {
     setSignBtnPosition([xySignature]);
   };
 
-//   console.log('widgetPositions', widgetPositions);
+  const handleDragStart = (e, widget) => {
+    setActiveWidget(widget);
+    e.dataTransfer.setData('text/plain', JSON.stringify(widget));
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const widget = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const newWidget = {
+      ...widget,
+      id: Date.now(),
+      position: { x, y },
+      size: { width: 100, height: 40 },
+    };
+
+    setWidget(newWidget);
+    setActiveWidget(null);
+  };
 
   return (
     <MainCard title={state?.title ? state.title : 'New Document'}>
@@ -606,12 +674,14 @@ const CustomizePdfSign = () => {
                 >
                   {containerWH && (
                     <Box
-                      ref={pdfContainerRef}
+                      id="pdf-container"
+                      ref={drop}
                       sx={{
                         width: '100%',
                         height: '100%',
                         position: 'relative',
                         backgroundColor: isOver ? 'rgba(0,0,0,0.1)' : 'transparent',
+                        cursor: isOver ? 'copy' : 'default',
                       }}
                     >
                       <RenderPdf
@@ -623,7 +693,6 @@ const CustomizePdfSign = () => {
                         numPages={numPages}
                         pageDetails={pageDetails}
                         placeholder={true}
-                        drop={drop}
                         handleDeleteSign={handleDeleteSign}
                         handleTabDrag={handleTabDrag}
                         handleStop={handleStop}
@@ -664,22 +733,18 @@ const CustomizePdfSign = () => {
                         widgetPositions={widgetPositions}
                         setWidgetPositions={setWidgetPositions}
                       />
+                      {widgets.map((widget) => (
+                        <WidgetComponent
+                          key={widget.id}
+                          widget={widget}
+                          onDragStart={handleDragStart}
+                        />
+                      ))}
                     </Box>
                   )}
                 </Box>
                 <Box sx={{ width: '20%', height: '100%' }}>
-                  <div aria-disabled>
-                    <div data-tut="addWidgets">
-                      <WidgetComponent
-                        isMailSend={false}
-                        handleDivClick={handleDivClick}
-                        handleMouseLeave={handleMouseLeave}
-                        isSignYourself={false}
-                        addPositionOfSignature={addPositionOfSignature}
-                        initial={true}
-                      />
-                    </div>
-                  </div>
+                  <WidgetList />
                 </Box>
               </Box>
             </Box>

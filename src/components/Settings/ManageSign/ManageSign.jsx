@@ -16,10 +16,11 @@ import { PenTool } from 'lucide-react';
 // import Parse from 'parse';
 // import { SaveFileSize } from '../constant/saveFileSize';
 import { useTranslation } from 'react-i18next';
-import { generateTitleFromFilename, getSecureUrl, toDataUrl } from '../../../constant/Utils';
+import { getSecureUrl, toDataUrl } from '../../../constant/Utils';
 import sanitizeFileName from '../../../primitives/sanitizeFileName';
 import MainCard from 'ui-component/cards/MainCard';
 import CButton from '../../../ui-component/CButton/CButton';
+import { generateTitleFromFilename } from '../../../constant/constant';
 
 const ManageSign = () => {
   const { t } = useTranslation();

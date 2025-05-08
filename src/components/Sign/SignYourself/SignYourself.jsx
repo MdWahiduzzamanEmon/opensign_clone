@@ -6,7 +6,6 @@ import { Box, Button } from '@mui/material';
 import CButton from '../../../ui-component/CButton/CButton';
 import { useNavigate } from 'react-router';
 import { generateTitleFromFilename } from '../../../constant/constant';
-
 const TITLE = 'Sign Yourself';
 const SUBTITLE = 'signyour-self-description';
 
