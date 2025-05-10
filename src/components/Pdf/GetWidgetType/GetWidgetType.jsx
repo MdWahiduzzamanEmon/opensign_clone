@@ -4,8 +4,8 @@ import { useDrag } from 'react-dnd';
 
 const GetWidgetType = ({ item, widgetName }) => {
   const [{ isDragging }, drag] = useDrag({
-    type: 'BOX',
-    item: { type: item.id, text: item.id },
+    type: 'item',
+    item: { type: item.id, text: item.name, icon: item.icon },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

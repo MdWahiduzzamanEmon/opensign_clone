@@ -4,12 +4,14 @@ import MainCard from 'ui-component/cards/MainCard';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDrop } from 'react-dnd';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import Tour from 'reactour';
 import '../../../assets/css/signature.css';
 import RenderAllPdfPage from '../RenderAllPdfPage/RenderAllPdfPage';
 import { isMobile, radioButtonWidget, textInputWidget, textWidget } from '../../../config';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   addWidgetOptions,
   defaultWidthHeight,
@@ -26,16 +28,15 @@ import PdfZoom from '../PdfZoom';
 import { Box, Grid } from '@mui/material';
 import RenderPdf from '../RenderPdf';
 import Header from '../PdfHeader';
-import WidgetComponent from '../WidgetComponent';
 import WidgetNameModal from '../WidgetNameModal';
 import WidgetList from '../WidgetList/WidgetList';
-import Placeholder from '../Placeholder/Placeholder';
+import Canvas from '../../../TestDND/Canvas/Canvas';
+import SignatureModal from '../../Pdf/SignatureModal/SignatureModal';
 
 const CustomizePdfSign = () => {
   const { state } = useLocation();
   const { t } = useTranslation();
   const divRef = useRef(null);
-  const pdfContainerRef = useRef(null); // New ref for the drop target
   const [pdfLoad, setPdfLoad] = useState(false);
   const [containerWH, setContainerWH] = useState();
   const [pdfNewWidth, setPdfNewWidth] = useState();
@@ -87,7 +88,7 @@ const CustomizePdfSign = () => {
   const [widgetPositions, setWidgetPositions] = useState([]);
   const [widget, setWidget] = useState(null);
   const [activeWidget, setActiveWidget] = useState(null);
-  const [widgets, setWidgets] = useState([]);
+  // const [widgets, setWidgets] = useState([]);
 
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
@@ -102,128 +103,94 @@ const CustomizePdfSign = () => {
   const numPages = 1;
 
   // Proper drop target implementation
-  const [{ isOver }, drop] = useDrop({
-    accept: 'BOX',
-    drop: (item, monitor) => {
-      const offset = monitor.getClientOffset();
-      const containerRect = document.getElementById('pdf-container').getBoundingClientRect();
-      const x = offset.x - containerRect.left;
-      const y = offset.y - containerRect.top;
 
-      const newWidget = {
-        ...item,
-        id: Date.now(),
-        position: { x, y },
-        size: { width: 100, height: 40 },
-      };
+  // const addPositionOfSignature = (item, monitor) => {
+  //   const posZIndex = zIndex + 1;
+  //   setZIndex(posZIndex);
 
-      setWidgets((prev) => [...prev, newWidget]);
-      addPositionOfSignature(
-        {
-          ...item,
-          x,
-          y,
-        },
-        monitor,
-      );
-    },
-    collect: (monitor) => ({ isOver: !!monitor.isOver() }),
-  });
+  //   const key = randomId();
+  //   const containerScale = getContainerScale(pdfOriginalWH, pageNumber, containerWH);
+  //   const dragTypeValue = item?.text ? item.text : item.type;
+  //   const widgetWidth = defaultWidthHeight(dragTypeValue).width * containerScale;
+  //   const widgetHeight = defaultWidthHeight(dragTypeValue).height * containerScale;
 
-  // Connect the drop ref to the container
-  useEffect(() => {
-    if (pdfContainerRef.current) {
-      drop(pdfContainerRef.current);
-    }
-  }, [drop]);
+  //   let dropObj;
 
-  const addPositionOfSignature = (item, monitor) => {
-    const posZIndex = zIndex + 1;
-    setZIndex(posZIndex);
+  //   if (item === 'onclick') {
+  //     const divHeight = divRef.current.getBoundingClientRect().height;
+  //     dropObj = {
+  //       key,
+  //       xPosition: widgetWidth / 4 + containerWH.width / 2,
+  //       yPosition: widgetHeight + divHeight / 2,
+  //       pageNumber,
+  //       scale: containerScale,
+  //       zIndex: posZIndex,
+  //       type: dragTypeValue,
+  //       Width: widgetWidth / (containerScale * scale),
+  //       Height: widgetHeight / (containerScale * scale),
+  //     };
+  //   } else {
+  //     // Use the x and y coordinates from the drop event
+  //     const x = item.x;
+  //     const y = item.y;
 
-    const key = randomId();
-    const containerScale = getContainerScale(pdfOriginalWH, pageNumber, containerWH);
-    const dragTypeValue = item?.text ? item.text : item.type;
-    const widgetWidth = defaultWidthHeight(dragTypeValue).width * containerScale;
-    const widgetHeight = defaultWidthHeight(dragTypeValue).height * containerScale;
+  //     dropObj = {
+  //       key,
+  //       xPosition: x / (containerScale * scale),
+  //       yPosition: y / (containerScale * scale),
+  //       pageNumber,
+  //       scale: containerScale,
+  //       zIndex: posZIndex,
+  //       type: dragTypeValue,
+  //       Width: widgetWidth / (containerScale * scale),
+  //       Height: widgetHeight / (containerScale * scale),
+  //     };
+  //   }
 
-    let dropObj;
+  //   // Update widget positions state
+  //   setWidgetPositions((prev) => [...prev, dropObj]);
 
-    if (item === 'onclick') {
-      const divHeight = divRef.current.getBoundingClientRect().height;
-      dropObj = {
-        key,
-        xPosition: widgetWidth / 4 + containerWH.width / 2,
-        yPosition: widgetHeight + divHeight / 2,
-        pageNumber,
-        scale: containerScale,
-        zIndex: posZIndex,
-        type: dragTypeValue,
-        Width: widgetWidth / (containerScale * scale),
-        Height: widgetHeight / (containerScale * scale),
-      };
-    } else {
-      // Use the x and y coordinates from the drop event
-      const x = item.x;
-      const y = item.y;
+  //   // Update signer positions if needed
+  //   const updatedSignerPos = [...signerPos];
+  //   const currentSigner = updatedSignerPos.find((signer) => signer.Id === uniqueId);
 
-      dropObj = {
-        key,
-        xPosition: x / (containerScale * scale),
-        yPosition: y / (containerScale * scale),
-        pageNumber,
-        scale: containerScale,
-        zIndex: posZIndex,
-        type: dragTypeValue,
-        Width: widgetWidth / (containerScale * scale),
-        Height: widgetHeight / (containerScale * scale),
-      };
-    }
+  //   if (currentSigner) {
+  //     const pagePlaceholder = currentSigner.placeHolder?.find((p) => p.pageNumber === pageNumber);
+  //     if (pagePlaceholder) {
+  //       pagePlaceholder.pos = [...(pagePlaceholder.pos || []), dropObj];
+  //     } else {
+  //       currentSigner.placeHolder = [
+  //         ...(currentSigner.placeHolder || []),
+  //         {
+  //           pageNumber,
+  //           pos: [dropObj],
+  //         },
+  //       ];
+  //     }
+  //     setSignerPos(updatedSignerPos);
+  //   }
 
-    // Update widget positions state
-    setWidgetPositions((prev) => [...prev, dropObj]);
+  //   // Set editing UI states
+  //   setSelectWidgetId(key);
+  //   setWidgetType(dragTypeValue);
+  //   setSignKey(key);
+  //   setCurrWidgetsDetails({});
+  //   setWidgetName(dragTypeValue);
 
-    // Update signer positions if needed
-    const updatedSignerPos = [...signerPos];
-    const currentSigner = updatedSignerPos.find((signer) => signer.Id === uniqueId);
-
-    if (currentSigner) {
-      const pagePlaceholder = currentSigner.placeHolder?.find((p) => p.pageNumber === pageNumber);
-      if (pagePlaceholder) {
-        pagePlaceholder.pos = [...(pagePlaceholder.pos || []), dropObj];
-      } else {
-        currentSigner.placeHolder = [
-          ...(currentSigner.placeHolder || []),
-          {
-            pageNumber,
-            pos: [dropObj],
-          },
-        ];
-      }
-      setSignerPos(updatedSignerPos);
-    }
-
-    // Set editing UI states
-    setSelectWidgetId(key);
-    setWidgetType(dragTypeValue);
-    setSignKey(key);
-    setCurrWidgetsDetails({});
-    setWidgetName(dragTypeValue);
-
-    // Set UI flags based on widget type
-    if (dragTypeValue === 'dropdown') {
-      setShowDropdown(true);
-    } else if (dragTypeValue === 'checkbox') {
-      setIsCheckbox(true);
-    } else if (
-      [textInputWidget, textWidget, 'name', 'company', 'job title', 'email'].includes(dragTypeValue)
-    ) {
-      setFontSize(12);
-      setFontColor('black');
-    } else if (dragTypeValue === radioButtonWidget) {
-      setIsRadio(true);
-    }
-  };
+  //   // Set UI flags based on widget type
+  //   if (dragTypeValue === 'dropdown') {
+  //     setShowDropdown(true);
+  //   } else if (dragTypeValue === 'checkbox') {
+  //     setIsCheckbox(true);
+  //   } else if (
+  //     [textInputWidget, textWidget, 'name', 'company', 'job title', 'email'].includes(dragTypeValue)
+  //   ) {
+  //     setFontSize(12);
+  //     setFontColor('black');
+  //   } else if (dragTypeValue === radioButtonWidget) {
+  //     setIsRadio(true);
+  //   }
+  // };
 
   const closeTour = () => {
     setCheckTourStatus(false);
@@ -299,7 +266,7 @@ const CustomizePdfSign = () => {
     };
     const timer = setTimeout(updateSize, 100);
     return () => clearTimeout(timer);
-  }, [divRef.current]);
+  }, []);
 
   const handleWidgetdefaultdata = (defaultdata, isSignWidget) => {
     if (isSignWidget) {
@@ -408,65 +375,65 @@ const CustomizePdfSign = () => {
     setPdfLoad(true);
   };
 
-  const handleDeleteSign = (key, Id) => {
-    const updateData = [];
-    const filterSignerPos = signerPos.filter((data) => data.Id === Id);
-    if (filterSignerPos.length > 0) {
-      const getPlaceHolder = filterSignerPos[0].placeHolder;
-      const getPageNumer = getPlaceHolder.filter((data) => data.pageNumber === pageNumber);
-      if (getPageNumer.length > 0) {
-        const getXYdata = getPageNumer[0].pos.filter((data) => data.key !== key);
-        if (getXYdata.length > 0) {
-          updateData.push(getXYdata);
-          const newUpdatePos = getPlaceHolder.map((obj) => {
-            if (obj.pageNumber === pageNumber) {
-              return { ...obj, pos: updateData[0] };
-            }
-            return obj;
-          });
+  // const handleDeleteSign = (key, Id) => {
+  //   const updateData = [];
+  //   const filterSignerPos = signerPos.filter((data) => data.Id === Id);
+  //   if (filterSignerPos.length > 0) {
+  //     const getPlaceHolder = filterSignerPos[0].placeHolder;
+  //     const getPageNumer = getPlaceHolder.filter((data) => data.pageNumber === pageNumber);
+  //     if (getPageNumer.length > 0) {
+  //       const getXYdata = getPageNumer[0].pos.filter((data) => data.key !== key);
+  //       if (getXYdata.length > 0) {
+  //         updateData.push(getXYdata);
+  //         const newUpdatePos = getPlaceHolder.map((obj) => {
+  //           if (obj.pageNumber === pageNumber) {
+  //             return { ...obj, pos: updateData[0] };
+  //           }
+  //           return obj;
+  //         });
 
-          const newUpdateSigner = signerPos.map((obj) => {
-            if (obj.Id === Id) {
-              return { ...obj, placeHolder: newUpdatePos };
-            }
-            return obj;
-          });
-          setSignerPos(newUpdateSigner);
-        } else {
-          const getRemainPage = filterSignerPos[0].placeHolder.filter(
-            (data) => data.pageNumber !== pageNumber,
-          );
-          if (getRemainPage && getRemainPage.length > 0) {
-            const newUpdatePos = filterSignerPos.map((obj) => {
-              if (obj.Id === Id) {
-                return { ...obj, placeHolder: getRemainPage };
-              }
-              return obj;
-            });
-            let signerupdate = [];
-            signerupdate = signerPos.filter((data) => data.Id !== Id);
-            signerupdate.push(newUpdatePos[0]);
-            setSignerPos(signerupdate);
-          } else {
-            const updatedData = signerPos.map((item) => {
-              if (item.Id === Id) {
-                const updatedItem = { ...item };
-                delete updatedItem.placeHolder;
-                return updatedItem;
-              }
-              return item;
-            });
-            setSignerPos(updatedData);
-          }
-        }
-      }
-    }
-  };
+  //         const newUpdateSigner = signerPos.map((obj) => {
+  //           if (obj.Id === Id) {
+  //             return { ...obj, placeHolder: newUpdatePos };
+  //           }
+  //           return obj;
+  //         });
+  //         setSignerPos(newUpdateSigner);
+  //       } else {
+  //         const getRemainPage = filterSignerPos[0].placeHolder.filter(
+  //           (data) => data.pageNumber !== pageNumber,
+  //         );
+  //         if (getRemainPage && getRemainPage.length > 0) {
+  //           const newUpdatePos = filterSignerPos.map((obj) => {
+  //             if (obj.Id === Id) {
+  //               return { ...obj, placeHolder: getRemainPage };
+  //             }
+  //             return obj;
+  //           });
+  //           let signerupdate = [];
+  //           signerupdate = signerPos.filter((data) => data.Id !== Id);
+  //           signerupdate.push(newUpdatePos[0]);
+  //           setSignerPos(signerupdate);
+  //         } else {
+  //           const updatedData = signerPos.map((item) => {
+  //             if (item.Id === Id) {
+  //               const updatedItem = { ...item };
+  //               delete updatedItem.placeHolder;
+  //               return updatedItem;
+  //             }
+  //             return item;
+  //           });
+  //           setSignerPos(updatedData);
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
 
-  const handleTabDrag = (key) => {
-    setDragKey(key);
-    setIsDragging(true);
-  };
+  // const handleTabDrag = (key) => {
+  //   setDragKey(key);
+  //   setIsDragging(true);
+  // };
 
   const handleStop = (event, dragElement, signerId, key) => {
     if (!isResize && isDragging) {
@@ -522,57 +489,115 @@ const CustomizePdfSign = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + offset);
   }
 
-  const handleDivClick = (e) => {
-    const isTouchEvent = e.type.startsWith('touch');
-    const divRect = e.currentTarget.getBoundingClientRect();
+  // const handleDivClick = (e) => {
+  //   const isTouchEvent = e.type.startsWith('touch');
+  //   const divRect = e.currentTarget.getBoundingClientRect();
 
-    let mouseX, mouseY;
+  //   let mouseX, mouseY;
 
-    if (isTouchEvent) {
-      const touch = e.touches[0];
-      mouseX = touch.clientX - divRect.left;
-      mouseY = touch.clientY - divRect.top;
-      setSignBtnPosition([{ xPos: mouseX, yPos: mouseY }]);
-    } else {
-      mouseX = e.clientX - divRect.left;
-      mouseY = e.clientY - divRect.top;
-      setXYSignature({ xPos: mouseX, yPos: mouseY });
+  //   if (isTouchEvent) {
+  //     const touch = e.touches[0];
+  //     mouseX = touch.clientX - divRect.left;
+  //     mouseY = touch.clientY - divRect.top;
+  //     setSignBtnPosition([{ xPos: mouseX, yPos: mouseY }]);
+  //   } else {
+  //     mouseX = e.clientX - divRect.left;
+  //     mouseY = e.clientY - divRect.top;
+  //     setXYSignature({ xPos: mouseX, yPos: mouseY });
+  //   }
+  // };
+
+  // const handleMouseLeave = () => {
+  //   setSignBtnPosition([xySignature]);
+  // };
+
+  const [widgets, setWidgets] = useState([]);
+  const [selectedWidgetId, setSelectedWidgetId] = useState(null);
+  const [isSignatureModal, setIsSignatureModal] = useState(false);
+  const [signaturePosition, setSignaturePosition] = useState(null);
+
+  const handleDrop = (item) => {
+    const id = uuidv4(); // Generate unique ID
+    const pageNumber = item.pageNumber || 1; // default page number if not specified
+    const left = item.left || 100; // default left position if not specified
+    const top = item.top || 100;
+    setWidgets((prev) => [
+      ...prev,
+      { ...item, id, left, top, type: item.type, pageNumber, text: '' },
+    ]);
+
+    setSelectedWidgetId(id);
+    setIsSignatureModal(true);
+  };
+
+  const handleMove = (id, left, top) => {
+    setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, left, top } : w)));
+  };
+
+  const handleSignatureModal = () => {
+    setIsSignatureModal(false);
+    setSelectedWidgetId(null);
+  };
+  const handleSaveSignature = (signature) => {
+    console.log('signature', signature);
+    setWidgets((prev) =>
+      prev.map((w) => (w.id === selectedWidgetId ? { ...w, text: signature } : w)),
+    );
+    setSignaturePosition(signature);
+    setIsSignatureModal(false);
+  };
+
+  const handleOpenWidgetEditor = (widgetId) => {
+    setSelectedWidgetId(widgetId);
+    const selectedWidget = widgets.find((w) => w.id === widgetId);
+    if (selectedWidget) {
+      setCurrWidgetsDetails(selectedWidget);
+      setIsSignatureModal(true);
+      setFontSize(selectedWidget.options.fontSize);
+      setFontColor(selectedWidget.options.fontColor);
+      //set text
+      setWidgets((prev) =>
+        prev.map((w) => (w.id === widgetId ? { ...w, text: selectedWidget.text } : w)),
+      );
     }
   };
-
-  const handleMouseLeave = () => {
-    setSignBtnPosition([xySignature]);
-  };
-
-  const handleDragStart = (e, widget) => {
-    setActiveWidget(widget);
-    e.dataTransfer.setData('text/plain', JSON.stringify(widget));
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const widget = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const newWidget = {
-      ...widget,
-      id: Date.now(),
-      position: { x, y },
-      size: { width: 100, height: 40 },
-    };
-
-    setWidget(newWidget);
-    setActiveWidget(null);
+  const handleDownloadPdf = async () => {
+    const existingPdfBytes = await fileToArrayBuffer(state.file);
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const pages = pdfDoc.getPages();
+    widgets.forEach((widget) => {
+      const { left = 100, top = 100, text, type, pageNumber } = widget;
+      if (!text) return;
+      if (type === 'signature') {
+        pages.forEach((page) => {
+          page.drawText(text, {
+            x: left,
+            y: page.getHeight() - top,
+            size: 12,
+            color: rgb(0, 0, 0),
+          });
+        });
+      } else {
+        const page = pages[0]; // Or a specific page if you add `pageNumber` to widgets
+        page.drawText(text, {
+          x: left,
+          y: page.getHeight() - top,
+          size: 12,
+          color: rgb(0, 0, 0),
+        });
+      }
+    });
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'signed.pdf';
+    link.click();
   };
 
   return (
     <MainCard title={state?.title ? state.title : 'New Document'}>
+      <button onClick={handleDownloadPdf}>Download PDF</button>
       <DndProvider backend={HTML5Backend}>
         <Box
           sx={{
@@ -591,6 +616,7 @@ const CustomizePdfSign = () => {
               width: '100%',
               display: 'flex',
               flexDirection: 'row',
+              position: 'relative',
             }}
           >
             <RenderAllPdfPage
@@ -674,75 +700,77 @@ const CustomizePdfSign = () => {
                 >
                   {containerWH && (
                     <Box
-                      id="pdf-container"
-                      ref={drop}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                        backgroundColor: isOver ? 'rgba(0,0,0,0.1)' : 'transparent',
-                        cursor: isOver ? 'copy' : 'default',
-                      }}
+                    // sx={{
+                    //   width: '100%',
+                    //   height: '100%',
+                    //   position: 'relative',
+                    //   // backgroundColor: isOver ? 'rgba(0,0,0,0.1)' : 'transparent',
+                    //   // cursor: isOver ? 'copy' : 'default',
+                    // }}
                     >
-                      <RenderPdf
+                      <Canvas
+                        widgets={widgets}
+                        onDrop={handleDrop}
+                        onMove={handleMove}
+                        handleOpenWidgetEditor={handleOpenWidgetEditor}
+                        setSignaturePosition={setSignaturePosition}
                         pageNumber={pageNumber}
-                        pdfNewWidth={pdfNewWidth}
-                        pdfDetails={pdfDetails}
-                        signerPos={signerPos}
-                        successEmail={false}
-                        numPages={numPages}
-                        pageDetails={pageDetails}
-                        placeholder={true}
-                        handleDeleteSign={handleDeleteSign}
-                        handleTabDrag={handleTabDrag}
-                        handleStop={handleStop}
-                        setPdfLoad={setPdfLoad}
-                        pdfLoad={pdfLoad}
-                        setSignerPos={setSignerPos}
-                        containerWH={containerWH}
-                        setIsResize={setIsResize}
-                        isResize={isResize}
-                        setZIndex={setZIndex}
-                        setIsPageCopy={setIsPageCopy}
-                        signersdata={signersdata}
-                        setSignKey={setSignKey}
-                        handleLinkUser={() => {}}
-                        setUniqueId={setUniqueId}
-                        isDragging={isDragging}
-                        setShowDropdown={setShowDropdown}
-                        setWidgetType={setWidgetType}
-                        setIsRadio={setIsRadio}
-                        setIsCheckbox={setIsCheckbox}
-                        setCurrWidgetsDetails={setCurrWidgetsDetails}
-                        setSelectWidgetId={setSelectWidgetId}
-                        selectWidgetId={selectWidgetId}
-                        handleNameModal={setIsNameModal}
-                        setTempSignerId={setTempSignerId}
-                        uniqueId={uniqueId}
-                        pdfOriginalWH={pdfOriginalWH}
-                        setScale={setScale}
-                        scale={scale}
-                        setIsSelectId={setIsSelectId}
-                        pdfBase64Url={pdfBase64Url}
-                        fontSize={fontSize}
-                        setFontSize={setFontSize}
-                        fontColor={fontColor}
-                        setFontColor={setFontColor}
-                        unSignedWidgetId={''}
-                        divRef={divRef}
-                        widgetPositions={widgetPositions}
-                        setWidgetPositions={setWidgetPositions}
-                      />
-                      {widgets.map((widget) => (
-                        <WidgetComponent
-                          key={widget.id}
-                          widget={widget}
-                          onDragStart={handleDragStart}
+                      >
+                        <RenderPdf
+                          pageNumber={pageNumber}
+                          pdfNewWidth={pdfNewWidth}
+                          pdfDetails={pdfDetails}
+                          signerPos={signerPos}
+                          successEmail={false}
+                          numPages={numPages}
+                          pageDetails={pageDetails}
+                          placeholder={true}
+                          // handleDeleteSign={handleDeleteSign}
+                          // handleTabDrag={handleTabDrag}
+                          handleStop={handleStop}
+                          setPdfLoad={setPdfLoad}
+                          pdfLoad={pdfLoad}
+                          setSignerPos={setSignerPos}
+                          containerWH={containerWH}
+                          setIsResize={setIsResize}
+                          isResize={isResize}
+                          setZIndex={setZIndex}
+                          setIsPageCopy={setIsPageCopy}
+                          signersdata={signersdata}
+                          setSignKey={setSignKey}
+                          handleLinkUser={() => {}}
+                          setUniqueId={setUniqueId}
+                          isDragging={isDragging}
+                          setShowDropdown={setShowDropdown}
+                          setWidgetType={setWidgetType}
+                          setIsRadio={setIsRadio}
+                          setIsCheckbox={setIsCheckbox}
+                          setCurrWidgetsDetails={setCurrWidgetsDetails}
+                          setSelectWidgetId={setSelectWidgetId}
+                          selectWidgetId={selectWidgetId}
+                          handleNameModal={setIsNameModal}
+                          setTempSignerId={setTempSignerId}
+                          uniqueId={uniqueId}
+                          pdfOriginalWH={pdfOriginalWH}
+                          setScale={setScale}
+                          scale={scale}
+                          setIsSelectId={setIsSelectId}
+                          pdfBase64Url={pdfBase64Url}
+                          fontSize={fontSize}
+                          setFontSize={setFontSize}
+                          fontColor={fontColor}
+                          setFontColor={setFontColor}
+                          unSignedWidgetId={''}
+                          // divRef={dropRef}
+                          widgetPositions={widgetPositions}
+                          setWidgetPositions={setWidgetPositions}
                         />
-                      ))}
+                      </Canvas>
                     </Box>
                   )}
                 </Box>
+
+                {/* // Widget List */}
                 <Box sx={{ width: '20%', height: '100%' }}>
                   <WidgetList />
                 </Box>
@@ -777,6 +805,12 @@ const CustomizePdfSign = () => {
           setFontSize={setFontSize}
           fontColor={fontColor}
           setFontColor={setFontColor}
+        />
+
+        <SignatureModal
+          isOpen={isSignatureModal}
+          onClose={handleSignatureModal}
+          onSave={handleSaveSignature}
         />
       </DndProvider>
     </MainCard>

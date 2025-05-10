@@ -16,7 +16,7 @@ import { Box } from '@mui/material';
 import Draggable from 'react-draggable';
 
 function RenderPdf(props) {
-  console.log('RenderPdf', props);
+  // console.log('RenderPdf', props);
   const { t } = useTranslation();
   const [scaledHeight, setScaledHeight] = useState();
   //check isGuestSigner is present in local if yes than handle login flow header in mobile view
@@ -41,6 +41,8 @@ function RenderPdf(props) {
       (signYourself ? posWidth * props.scale * containerScale : posWidth * containerScale)
     );
   };
+
+  // handle signature block width and height according to screen
   const posHeight = (pos, signYourself) => {
     const containerScale = getContainerScale(
       props.pdfOriginalWH,
@@ -376,7 +378,7 @@ function RenderPdf(props) {
             ref={props.drop}
             id="container"
           >
-            {props.pdfLoad &&
+            {/* {props.pdfLoad &&
               props.containerWH?.width &&
               props.pdfOriginalWH.length > 0 &&
               (props.pdfRequest || props.isSelfSign //pdf request sign flow
@@ -511,11 +513,11 @@ function RenderPdf(props) {
                             })}
                         </React.Fragment>
                       );
-                    }))}
+                    }))} */}
             {/* large device */}
             {/* this component for render pdf document is in middle of the component */}
-            {pdfDocument}
           </Box>
+          {pdfDocument}
         </RSC>
       )}
     </>

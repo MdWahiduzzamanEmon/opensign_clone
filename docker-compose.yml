@@ -1,0 +1,11 @@
+# //for production
+version: "3"
+services:
+  app:
+    image: doxigner-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 4173:4173 # //for production
+    restart: always
