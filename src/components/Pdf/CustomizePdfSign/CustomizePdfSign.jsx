@@ -31,7 +31,6 @@ import Header from '../PdfHeader';
 import WidgetNameModal from '../WidgetNameModal';
 import WidgetList from '../WidgetList/WidgetList';
 import Canvas from '../../../TestDND/Canvas/Canvas';
-import SignatureModal from '../../Pdf/SignatureModal/SignatureModal';
 
 const CustomizePdfSign = () => {
   const { state } = useLocation();
@@ -515,52 +514,55 @@ const CustomizePdfSign = () => {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
   const [isSignatureModal, setIsSignatureModal] = useState(false);
   const [signaturePosition, setSignaturePosition] = useState(null);
+  const [isWidgetNameModal, setIsWidgetNameModal] = useState(false);
+  const [widgetModalData, setWidgetModalData] = useState(null);
 
+  const signatureLikeWidgets = ['signature', 'initials'];
+
+  const widgetNameModalWidgets = [
+    'stamp',
+    'name',
+    'job_title',
+    'company',
+    'date',
+    'text',
+    'text_input',
+    'checkbox',
+    'dropdown',
+    'radio_button',
+    'image',
+    'email',
+  ];
+
+  // Remove widget handler
+  const handleRemoveWidget = (id) => {
+    setWidgets((prev) => prev.filter((w) => w.id !== id));
+  };
+
+  // Update handleDrop: do NOT open dialog after drop
   const handleDrop = (item) => {
-    const id = uuidv4(); // Generate unique ID
-    const pageNumber = item.pageNumber || 1; // default page number if not specified
-    const left = item.left || 100; // default left position if not specified
+    const id = uuidv4();
+    const pageNumber = item.pageNumber || 1;
+    const left = item.left || 100;
     const top = item.top || 100;
     setWidgets((prev) => [
       ...prev,
       { ...item, id, left, top, type: item.type, pageNumber, text: '' },
     ]);
-
     setSelectedWidgetId(id);
-    setIsSignatureModal(true);
+    // Do not open modal here
   };
 
-  const handleMove = (id, left, top) => {
-    setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, left, top } : w)));
-  };
-
-  const handleSignatureModal = () => {
-    setIsSignatureModal(false);
-    setSelectedWidgetId(null);
-  };
-  const handleSaveSignature = (signature) => {
-    console.log('signature', signature);
-    setWidgets((prev) =>
-      prev.map((w) => (w.id === selectedWidgetId ? { ...w, text: signature } : w)),
-    );
-    setSignaturePosition(signature);
-    setIsSignatureModal(false);
-  };
-
+  // Update handleOpenWidgetEditor to open the modal for editing
   const handleOpenWidgetEditor = (widgetId) => {
     setSelectedWidgetId(widgetId);
     const selectedWidget = widgets.find((w) => w.id === widgetId);
     if (selectedWidget) {
-      setCurrWidgetsDetails(selectedWidget);
-      setIsSignatureModal(true);
-      setFontSize(selectedWidget.options.fontSize);
-      setFontColor(selectedWidget.options.fontColor);
-      //set text
-      setWidgets((prev) =>
-        prev.map((w) => (w.id === widgetId ? { ...w, text: selectedWidget.text } : w)),
-      );
+      setWidgetModalData(selectedWidget);
+      setIsWidgetNameModal(true);
     }
   };
+
   const handleDownloadPdf = async () => {
     const existingPdfBytes = await fileToArrayBuffer(state.file);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -593,6 +595,18 @@ const CustomizePdfSign = () => {
     link.href = URL.createObjectURL(blob);
     link.download = 'signed.pdf';
     link.click();
+  };
+
+  // Move handler for widgets (for drag-and-drop repositioning)
+  const handleMove = (id, left, top) => {
+    setWidgets((prevWidgets) =>
+      prevWidgets.map((widget) => (widget.id === id ? { ...widget, left, top } : widget)),
+    );
+  };
+
+  const handleCloseWidgetNameModal = () => {
+    setIsWidgetNameModal(false);
+    setWidgetModalData(null);
   };
 
   return (
@@ -715,6 +729,7 @@ const CustomizePdfSign = () => {
                         handleOpenWidgetEditor={handleOpenWidgetEditor}
                         setSignaturePosition={setSignaturePosition}
                         pageNumber={pageNumber}
+                        onRemoveWidget={handleRemoveWidget}
                       >
                         <RenderPdf
                           pageNumber={pageNumber}
@@ -795,9 +810,9 @@ const CustomizePdfSign = () => {
         <WidgetNameModal
           signatureType={signatureType}
           widgetName={widgetName}
-          defaultdata={currWidgetsDetails}
-          isOpen={isNameModal}
-          handleClose={handleNameModal}
+          defaultdata={widgetModalData}
+          isOpen={isWidgetNameModal}
+          handleClose={handleCloseWidgetNameModal}
           handleData={handleWidgetdefaultdata}
           isTextSetting={isTextSetting}
           setIsTextSetting={setIsTextSetting}
@@ -805,12 +820,6 @@ const CustomizePdfSign = () => {
           setFontSize={setFontSize}
           fontColor={fontColor}
           setFontColor={setFontColor}
-        />
-
-        <SignatureModal
-          isOpen={isSignatureModal}
-          onClose={handleSignatureModal}
-          onSave={handleSaveSignature}
         />
       </DndProvider>
     </MainCard>

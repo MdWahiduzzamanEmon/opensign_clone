@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useDrag } from 'react-dnd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
 
 const GetWidgetType = ({ item, widgetName }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -12,76 +14,32 @@ const GetWidgetType = ({ item, widgetName }) => {
   });
 
   return (
-    <Button
+    <Box
       ref={drag}
-      variant="outlined"
-      color="primary"
-      size="small"
       sx={{
-        width: '100%',
-        p: 1,
-        borderWidth: '1.5px',
-        textTransform: 'none',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        background: '#102048',
+        color: '#fff',
+        borderRadius: '999px',
+        px: 1.5,
+        py: 0.5,
+        mb: 0.5,
+        boxShadow: '0 1px 2px rgba(16,32,72,0.08)',
+        border: '2px solid #1a237e',
+        fontWeight: 600,
+        fontSize: 16,
+        cursor: isDragging ? 'grabbing' : 'grab',
         opacity: isDragging ? 0.5 : 1,
-        cursor: 'grab',
-        '&:active': {
-          cursor: 'grabbing',
-        },
+        transition: 'background 0.2s',
+        '&:hover': { background: '#1a237e' },
+        userSelect: 'none',
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
-        <i className="fa-light fa-grip-vertical" style={{ marginLeft: 3 }}></i>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            ml: 1,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '200px',
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              fontSize: '14px',
-              fontWeight: 500,
-              color: 'text.primary',
-              textTransform: 'capitalize',
-            }}
-          >
-            {widgetName}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: '12px',
-              color: 'text.secondary',
-            }}
-          >
-            {item.description}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          fontSize: '20px',
-          width: 40,
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <i className={item.icon}></i>
-      </Box>
-    </Button>
+      <FontAwesomeIcon icon={faGripVertical} style={{ marginRight: 12, color: '#b0b8d1' }} />
+      <span style={{ flex: 1, textTransform: 'lowercase' }}>{widgetName}</span>
+      <FontAwesomeIcon icon={item.icon} style={{ marginLeft: 12, color: '#fff' }} />
+    </Box>
   );
 };
 

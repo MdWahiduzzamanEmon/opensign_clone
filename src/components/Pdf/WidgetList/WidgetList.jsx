@@ -1,59 +1,52 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import GetWidgetType from '../GetWidgetType/GetWidgetType';
+import {
+  faGripVertical,
+  faSignature,
+  faStamp,
+  faUser,
+  faIdBadge,
+  faBuilding,
+  faCalendar,
+  faFont,
+  faA,
+  faCheckSquare,
+  faCaretDown,
+  faDotCircle,
+  faImage,
+  faEnvelope,
+} from '@fortawesome/free-solid-svg-icons';
 
 const widgetTypes = [
-  {
-    id: 'signature',
-    name: 'Signature',
-    description: 'Add a signature field',
-    icon: 'fa-light fa-signature',
-  },
-  {
-    id: 'initial',
-    name: 'Initial',
-    description: 'Add an initial field',
-    icon: 'fa-light fa-signature',
-  },
-  {
-    id: 'date',
-    name: 'Date',
-    description: 'Add a date field',
-    icon: 'fa-light fa-calendar',
-  },
-  {
-    id: 'text',
-    name: 'Text',
-    description: 'Add a text field',
-    icon: 'fa-light fa-font',
-  },
-  {
-    id: 'checkbox',
-    name: 'Checkbox',
-    description: 'Add a checkbox field',
-    icon: 'fa-light fa-square-check',
-  },
+  { id: 'signature', name: 'signature', icon: faSignature },
+  { id: 'stamp', name: 'stamp', icon: faStamp },
+  { id: 'initials', name: 'initials', icon: faSignature },
+  { id: 'name', name: 'name', icon: faUser },
+  { id: 'job_title', name: 'job title', icon: faIdBadge },
+  { id: 'company', name: 'company', icon: faBuilding },
+  { id: 'date', name: 'date', icon: faCalendar },
+  { id: 'text', name: 'text', icon: faFont },
+  { id: 'text_input', name: 'text input', icon: faA },
+  { id: 'checkbox', name: 'checkbox', icon: faCheckSquare },
+  { id: 'dropdown', name: 'dropdown', icon: faCaretDown },
+  { id: 'radio_button', name: 'radio button', icon: faDotCircle },
+  { id: 'image', name: 'image', icon: faImage },
+  { id: 'email', name: 'email', icon: faEnvelope },
 ];
 
 const WidgetList = () => {
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Available Widgets
+      <Typography
+        variant="subtitle2"
+        sx={{ mb: 1, color: '#1a237e', fontWeight: 700, letterSpacing: 1 }}
+      >
+        Fields
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {widgetTypes.map((widget) => (
-          <Box
-            key={widget.id}
-            sx={{
-              userSelect: 'none',
-              '&:hover': {
-                opacity: 0.8,
-              },
-            }}
-          >
-            <GetWidgetType item={widget} widgetName={widget.name} />
-          </Box>
+          <GetWidgetType key={widget.id} item={widget} widgetName={widget.name} />
         ))}
       </Box>
     </Box>
