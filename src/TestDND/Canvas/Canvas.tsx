@@ -44,6 +44,7 @@ const Canvas = ({
     text?: string;
     name?: string;
     defaultValue?: string;
+    SignUrl?: string; // <-- Add this line
   }>;
   onDrop: (item: {
     id: string;
@@ -59,6 +60,8 @@ const Canvas = ({
   onRemoveWidget: (id: string) => void;
   children: React.ReactNode;
 }) => {
+  console.log('Canvas rendered with widgets:', widgets);
+
   const [{ isOver }, drop] = useDrop<{ id?: string; type: string }, void, { isOver: boolean }>({
     accept: ItemTypes.WIDGET,
     drop(item, monitor) {
@@ -130,6 +133,7 @@ const Canvas = ({
             name={widget.name}
             defaultValue={widget.defaultValue}
             onDuplicate={() => handleDuplicateWidget(widget)}
+            SignUrl={widget.SignUrl} // <-- Pass SignUrl prop
           />
         ))}
     </Box>
@@ -160,7 +164,7 @@ type WidgetType = {
   name?: string;
 };
 
-const DraggableWidget: React.FC<WidgetType> = ({
+const DraggableWidget: React.FC<WidgetType & { SignUrl?: string }> = ({
   id,
   left,
   top,
@@ -172,6 +176,7 @@ const DraggableWidget: React.FC<WidgetType> = ({
   name,
   defaultValue,
   onDuplicate,
+  SignUrl,
 }) => {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [size, setSize] = React.useState({ width: 180, height: 48 });
@@ -399,26 +404,34 @@ const DraggableWidget: React.FC<WidgetType> = ({
           pointerEvents: isDragging ? 'none' : 'auto',
         }}
       >
-        <span
-          style={{
-            textAlign: 'center',
-            fontWeight: 700,
-            fontSize: 22,
-            color: '#222',
-            letterSpacing: 0.2,
-            userSelect: 'none',
-            width: '100%',
-            whiteSpace: 'pre-line',
-            wordBreak: 'break-word',
-          }}
-        >
-          {/* Prefer defaultValue, then name, then text, then fallback label */}
-          {typeof defaultValue !== 'undefined' && defaultValue !== ''
-            ? defaultValue
-            : typeof name !== 'undefined' && name !== ''
-              ? name
-              : text || widgetTypeLabels[type] || type}
-        </span>
+        {['signature', 'initials'].includes(type) && SignUrl ? (
+          <img
+            src={SignUrl}
+            alt={type + ' preview'}
+            style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: 6 }}
+          />
+        ) : (
+          <span
+            style={{
+              textAlign: 'center',
+              fontWeight: 700,
+              fontSize: 22,
+              color: '#222',
+              letterSpacing: 0.2,
+              userSelect: 'none',
+              width: '100%',
+              whiteSpace: 'pre-line',
+              wordBreak: 'break-word',
+            }}
+          >
+            {/* Prefer defaultValue, then name, then text, then fallback label */}
+            {typeof defaultValue !== 'undefined' && defaultValue !== ''
+              ? defaultValue
+              : typeof name !== 'undefined' && name !== ''
+                ? name
+                : text || widgetTypeLabels[type] || type}
+          </span>
+        )}
       </div>
       {/* Resize handle at bottom-right (diagonal resize) */}
       <div

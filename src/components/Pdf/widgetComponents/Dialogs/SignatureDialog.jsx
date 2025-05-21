@@ -1,8 +1,16 @@
+// Use globalThis for setTimeout/clearTimeout to avoid SSR/test errors
+const setTimeoutFn =
+  typeof globalThis.setTimeout !== 'undefined' ? globalThis.setTimeout : (fn, ms) => fn();
+const clearTimeoutFn =
+  typeof globalThis.clearTimeout !== 'undefined' ? globalThis.clearTimeout : () => {};
+
 // ...existing code from previous SignatureDialog.jsx...
 import React, { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Box, Button, Typography, IconButton, Stack } from '@mui/material';
 import { PenTool } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { setSignature as setSignatureRedux } from '../../../../store/signatureSlice';
 
 if (!globalThis.FileReader) {
   globalThis.FileReader = class {
@@ -15,13 +23,23 @@ if (!globalThis.FileReader) {
 const allColor = ['blue', 'red', 'black'];
 
 const SignatureDialog = ({ open, onClose, onSave }) => {
+  const dispatch = useDispatch();
   const [tab, setTab] = useState('draw');
   const [penColor, setPenColor] = useState('blue');
   const [signature, setSignature] = useState('');
   const [image, setImage] = useState('');
   const [typed, setTyped] = useState('');
+  const [pendingClose, setPendingClose] = useState(false);
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
+
+  // Ensure signature preview updates on tab change
+  const handleTabChange = (t) => {
+    setTab(t);
+    if (t !== 'draw') setSignature('');
+    if (t !== 'upload') setImage('');
+    if (t !== 'type') setTyped('');
+  };
 
   const handleClear = () => {
     canvasRef.current?.clear();
@@ -31,11 +49,21 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
   const handleSave = () => {
     if (tab === 'draw') {
       const dataUrl = canvasRef.current?.toDataURL();
-      onSave(dataUrl);
+      setSignature(dataUrl);
+      dispatch(setSignatureRedux({ signature: dataUrl, signatureType: 'draw' }));
+      onSave && onSave({ value: dataUrl, type: 'draw' });
+      setPendingClose(true);
+      return;
     } else if (tab === 'upload') {
-      onSave(image);
+      dispatch(setSignatureRedux({ signature: image, signatureType: 'upload' }));
+      onSave && onSave({ value: image, type: 'upload' });
+      setPendingClose(true);
+      return;
     } else if (tab === 'type') {
-      onSave(typed);
+      dispatch(setSignatureRedux({ signature: typed, signatureType: 'type' }));
+      onSave && onSave({ value: typed, type: 'type' });
+      setPendingClose(true);
+      return;
     }
     onClose();
   };
@@ -48,6 +76,17 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
       reader.readAsDataURL(file);
     }
   };
+
+  // Close dialog only after user confirms or after a short delay
+  React.useEffect(() => {
+    if (pendingClose) {
+      const timer = setTimeoutFn(() => {
+        setPendingClose(false);
+        onClose();
+      }, 800);
+      return () => clearTimeoutFn(timer);
+    }
+  }, [pendingClose, onClose]);
 
   if (!open) return null;
 
@@ -91,7 +130,7 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
           {['draw', 'upload', 'type'].map((t) => (
             <Typography
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => handleTabChange(t)}
               sx={{
                 fontWeight: 600,
                 fontSize: 20,
@@ -132,10 +171,26 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
                   className: 'signatureCanvas',
                   style: { width: '100%', height: 160, background: 'white', borderRadius: 8 },
                 }}
-                onEnd={() => setSignature(canvasRef.current?.toDataURL())}
+                onEnd={() => {
+                  const dataUrl = canvasRef.current?.toDataURL();
+                  setSignature(dataUrl);
+                }}
                 dotSize={1}
               />
             </Box>
+            {/* Preview for drawn signature */}
+            {signature && (
+              <Box border={1} p={1} mt={1} sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                  Preview:
+                </Typography>
+                <img
+                  src={signature}
+                  alt="signature preview"
+                  style={{ width: 220, maxHeight: 120 }}
+                />
+              </Box>
+            )}
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
               {allColor.map((color) => (
                 <IconButton
@@ -158,6 +213,19 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
         )}
         {tab === 'upload' && (
           <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Preview for uploaded image */}
+            {image && (
+              <Box border={1} p={1} mt={1} sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                  Preview:
+                </Typography>
+                <img
+                  src={image}
+                  alt="signature upload preview"
+                  style={{ width: 220, maxHeight: 120 }}
+                />
+              </Box>
+            )}
             <input
               type="file"
               accept="image/*"
@@ -172,11 +240,6 @@ const SignatureDialog = ({ open, onClose, onSave }) => {
             >
               Upload
             </Button>
-            {image && (
-              <Box border={1} p={1} mt={1}>
-                <img src={image} alt="signature" style={{ width: 220, maxHeight: 120 }} />
-              </Box>
-            )}
           </Box>
         )}
         {tab === 'type' && (

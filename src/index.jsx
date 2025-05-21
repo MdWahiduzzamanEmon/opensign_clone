@@ -1,10 +1,12 @@
 import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 
 // project imports
 import App from 'App';
 import * as serviceWorker from 'serviceWorker';
 import reportWebVitals from 'reportWebVitals';
 import { ConfigProvider } from 'contexts/ConfigContext';
+import store from './store/store';
 
 // style + assets
 import 'assets/scss/style.scss';
@@ -62,14 +64,17 @@ const generatePreview = (props) => {
   );
 };
 
+// This file is only run in the browser, so document is always defined
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
   <ConfigProvider>
-    <DndProvider options={HTML5toTouch}>
-      <Preview>{generatePreview}</Preview>
-      <App />
-    </DndProvider>
+    <Provider store={store}>
+      <DndProvider options={HTML5toTouch}>
+        <Preview>{generatePreview}</Preview>
+        <App />
+      </DndProvider>
+    </Provider>
   </ConfigProvider>,
 );
 
