@@ -32,7 +32,7 @@ const Canvas = ({
   handleOpenWidgetEditor,
   setSignaturePosition,
   pageNumber,
-  onRemoveWidget, // add this prop
+  onRemoveWidget,
   children,
 }: {
   widgets: Array<{
@@ -42,6 +42,8 @@ const Canvas = ({
     top: number;
     type: string;
     text?: string;
+    name?: string;
+    defaultValue?: string;
   }>;
   onDrop: (item: {
     id: string;
@@ -54,7 +56,7 @@ const Canvas = ({
   handleOpenWidgetEditor: (id: string) => void;
   setSignaturePosition: (position: { x: number; y: number }) => void;
   pageNumber: number;
-  onRemoveWidget: (id: string) => void; // add this prop
+  onRemoveWidget: (id: string) => void;
   children: React.ReactNode;
 }) => {
   const [{ isOver }, drop] = useDrop<{ id?: string; type: string }, void, { isOver: boolean }>({
@@ -87,6 +89,18 @@ const Canvas = ({
     }),
   });
 
+  // Add duplicate handler
+  const handleDuplicateWidget = (widget: any) => {
+    const newId = Date.now().toString() + Math.floor(Math.random() * 1000);
+    onDrop({
+      id: newId,
+      type: widget.type,
+      left: widget.left + 24,
+      top: widget.top + 24,
+      pageNumber: widget.pageNumber,
+    });
+  };
+
   return (
     <Box
       id="canvas"
@@ -111,8 +125,11 @@ const Canvas = ({
             type={widget.type}
             onMove={onMove}
             onClick={() => handleOpenWidgetEditor(widget.id)}
-            onRemove={() => onRemoveWidget(widget.id)} // pass remove handler
+            onRemove={() => onRemoveWidget(widget.id)}
             text={widget.text}
+            name={widget.name}
+            defaultValue={widget.defaultValue}
+            onDuplicate={() => handleDuplicateWidget(widget)}
           />
         ))}
     </Box>
@@ -126,16 +143,10 @@ const MAX_WIDTH = 600;
 const MIN_HEIGHT = 32;
 const MAX_HEIGHT = 300;
 
-const DraggableWidget = ({
-  id,
-  left,
-  top,
-  type,
-  onMove,
-  onClick,
-  onRemove,
-  text,
-}: {
+// Fix: DraggableWidget must be a React component (function or const with React.FC)
+// and props must match what is passed from Canvas
+
+type WidgetType = {
   id: string;
   left: number;
   top: number;
@@ -144,6 +155,23 @@ const DraggableWidget = ({
   onClick: () => void;
   onRemove: () => void;
   text?: string;
+  onDuplicate: () => void;
+  defaultValue?: string;
+  name?: string;
+};
+
+const DraggableWidget: React.FC<WidgetType> = ({
+  id,
+  left,
+  top,
+  type,
+  onMove,
+  onClick,
+  onRemove,
+  text,
+  name,
+  defaultValue,
+  onDuplicate,
 }) => {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [size, setSize] = React.useState({ width: 180, height: 48 });
@@ -173,19 +201,21 @@ const DraggableWidget = ({
       accept: ItemTypes.WIDGET,
       hover(item: any, monitor) {
         if (!ref.current) return;
-        const delta = monitor.getDifferenceFromInitialOffset();
-        if (!delta) return;
+        const initial = monitor.getInitialSourceClientOffset();
+        const current = monitor.getClientOffset();
+        if (!initial || !current) return;
         const canvas = document.getElementById('canvas');
         if (!canvas) return;
         const canvasRect = canvas.getBoundingClientRect();
         const widgetRect = ref.current.getBoundingClientRect();
-        const newLeft = Math.round(item.left + delta.x);
-        const newTop = Math.round(item.top + delta.y);
+        // Calculate new absolute position based on mouse, not delta
+        const newLeft = current.x - canvasRect.left - widgetRect.width / 2;
+        const newTop = current.y - canvasRect.top - widgetRect.height / 2;
         const maxLeft = canvasRect.width - widgetRect.width;
         const maxTop = canvasRect.height - widgetRect.height;
         const clampedLeft = Math.max(0, Math.min(newLeft, maxLeft));
         const clampedTop = Math.max(0, Math.min(newTop, maxTop));
-        if (Math.abs(clampedLeft - item.left) > 1 || Math.abs(clampedTop - item.top) > 1) {
+        if (item.left !== clampedLeft || item.top !== clampedTop) {
           item.left = clampedLeft;
           item.top = clampedTop;
           onMove(item.id, clampedLeft, clampedTop);
@@ -283,13 +313,17 @@ const DraggableWidget = ({
           right: 0,
           display: 'flex',
           gap: 6,
-          // background: '#f8faff',
-          // borderRadius: 20,
-          // boxShadow: '0 1px 4px 0 #b3c6e6',
           padding: '2px 12px',
           alignItems: 'center',
-          // border: '1.5px solid #b3c6e6',
           height: 32,
+
+          borderRadius: '5px 0 0 5px',
+          border: '1px dashed #7da7e6',
+          borderBottom: 'none',
+          boxShadow: '0 2px 12px 0 rgba(33, 150, 243, 0.10)',
+          zIndex: 2,
+          cursor: 'pointer',
+          pointerEvents: isDragging ? 'none' : 'auto',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -299,7 +333,7 @@ const DraggableWidget = ({
             border: 'none',
             color: '#7da7e6',
             cursor: 'pointer',
-            fontSize: 18,
+            fontSize: 14,
             padding: 0,
           }}
           aria-label="Settings"
@@ -312,7 +346,7 @@ const DraggableWidget = ({
             border: 'none',
             color: '#7da7e6',
             cursor: 'pointer',
-            fontSize: 18,
+            fontSize: 14,
             padding: 0,
           }}
           aria-label="User"
@@ -325,10 +359,14 @@ const DraggableWidget = ({
             border: 'none',
             color: '#7da7e6',
             cursor: 'pointer',
-            fontSize: 18,
+            fontSize: 14,
             padding: 0,
           }}
           aria-label="Copy"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
         >
           <FiCopy />
         </button>
@@ -350,22 +388,38 @@ const DraggableWidget = ({
         </button>
       </div>
       {/* Widget label */}
-      <span
+      <div
         style={{
           flex: 1,
-          textAlign: 'center',
-          fontWeight: 700,
-          fontSize: 22,
-          color: '#222',
-          letterSpacing: 0.2,
-          userSelect: 'none',
-          pointerEvents: isDragging ? 'none' : 'auto',
-          padding: '18px 0',
           width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: isDragging ? 'none' : 'auto',
         }}
       >
-        {text || widgetTypeLabels[type] || type}
-      </span>
+        <span
+          style={{
+            textAlign: 'center',
+            fontWeight: 700,
+            fontSize: 22,
+            color: '#222',
+            letterSpacing: 0.2,
+            userSelect: 'none',
+            width: '100%',
+            whiteSpace: 'pre-line',
+            wordBreak: 'break-word',
+          }}
+        >
+          {/* Prefer defaultValue, then name, then text, then fallback label */}
+          {typeof defaultValue !== 'undefined' && defaultValue !== ''
+            ? defaultValue
+            : typeof name !== 'undefined' && name !== ''
+              ? name
+              : text || widgetTypeLabels[type] || type}
+        </span>
+      </div>
       {/* Resize handle at bottom-right (diagonal resize) */}
       <div
         style={{

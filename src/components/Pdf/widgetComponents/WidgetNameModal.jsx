@@ -5,9 +5,13 @@ import RegexParser from 'regex-parser';
 // import { textInputWidget, textWidget } from '../../constant/Utils';
 // import { fontColorArr, fontsizeArr } from '../../constant/Utils';
 import { useTranslation } from 'react-i18next';
-import { fontColorArr, fontsizeArr, textInputWidget, textWidget } from '../../config';
-import { signatureTypes } from '../../constant/constant';
-import ModalUi from '../../ui-component/ModalUi';
+import { fontColorArr, fontsizeArr, textInputWidget, textWidget } from '../../../config';
+import { signatureTypes } from '../../../constant/constant';
+import ModalUi from '../../../ui-component/ModalUi';
+
+// Remove legacy modal/dialog files after migration
+// These files are now modularized and imported from their new locations.
+// Safe to delete.
 
 const WidgetNameModal = (props) => {
   const { t } = useTranslation();

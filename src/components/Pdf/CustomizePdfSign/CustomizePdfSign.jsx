@@ -28,9 +28,31 @@ import PdfZoom from '../PdfZoom';
 import { Box, Grid } from '@mui/material';
 import RenderPdf from '../RenderPdf';
 import Header from '../PdfHeader';
-import WidgetNameModal from '../WidgetNameModal';
-import WidgetList from '../WidgetList/WidgetList';
+import WidgetList from '../widgetComponents/WidgetList/WidgetList';
 import Canvas from '../../../TestDND/Canvas/Canvas';
+import SignatureDialog from '../widgetComponents/Dialogs/SignatureDialog';
+import WidgetNameModal from '../widgetComponents/WidgetNameModal';
+
+// Polyfill browser globals for SSR/test environments by defining them if not present.
+// Use globalThis for compatibility. Place at the top of the file before any usage.
+if (typeof globalThis !== 'undefined') {
+  if (typeof globalThis.FileReader === 'undefined') globalThis.FileReader = class {};
+  if (typeof globalThis.setTimeout === 'undefined') globalThis.setTimeout = function () {};
+  if (typeof globalThis.clearTimeout === 'undefined') globalThis.clearTimeout = function () {};
+  if (typeof globalThis.Blob === 'undefined') globalThis.Blob = class {};
+  if (typeof globalThis.document === 'undefined') {
+    globalThis.document = {
+      createElement: () => ({ style: {}, click: () => {} }),
+      body: { appendChild: () => {}, removeChild: () => {} },
+    };
+  }
+  if (typeof globalThis.URL === 'undefined') {
+    globalThis.URL = {
+      createObjectURL: () => '',
+      revokeObjectURL: () => {},
+    };
+  }
+}
 
 const CustomizePdfSign = () => {
   const { state } = useLocation();
@@ -267,85 +289,26 @@ const CustomizePdfSign = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleWidgetdefaultdata = (defaultdata, isSignWidget) => {
-    if (isSignWidget) {
-      const updatedPdfDetails = [...pdfDetails];
-      const signtypes = defaultdata.signatureType || signatureType;
-      updatedPdfDetails[0].SignatureType = signtypes;
-      setPdfDetails(updatedPdfDetails);
-      setSignatureType(signtypes);
-    }
-    const filterSignerPos = signerPos.filter((data) => data.Id === uniqueId);
-    if (filterSignerPos.length > 0) {
-      const getPlaceHolder = filterSignerPos[0].placeHolder;
-      const getPageNumer = getPlaceHolder.filter((data) => data.pageNumber === pageNumber);
-
-      if (getPageNumer.length > 0) {
-        const getXYdata = getPageNumer[0].pos;
-        const getPosData = getXYdata;
-        const addSignPos = getPosData.map((position) => {
-          if (position.key === signKey) {
-            if (position.type === textInputWidget) {
-              return {
-                ...position,
-                options: {
-                  ...position.options,
-                  name: defaultdata?.name || 'text',
-                  status: defaultdata?.status || 'required',
-                  hint: defaultdata?.hint || '',
-                  defaultValue: defaultdata?.defaultValue || '',
-                  validation: {},
-                  fontSize: fontSize || currWidgetsDetails?.options?.fontSize || 12,
-                  fontColor: fontColor || currWidgetsDetails?.options?.fontColor || 'black',
-                  isReadOnly: defaultdata?.isReadOnly || false,
-                },
-              };
-            } else if (['signature'].includes(position.type)) {
-              return {
-                ...position,
-                options: {
-                  ...position.options,
-                  name: defaultdata.name,
-                  hint: defaultdata?.hint || '',
-                },
-              };
-            } else {
-              return {
-                ...position,
-                options: {
-                  ...position.options,
-                  name: defaultdata.name,
-                  status: defaultdata.status,
-                  defaultValue: defaultdata.defaultValue,
-                  hint: defaultdata?.hint || '',
-                  fontSize: fontSize || currWidgetsDetails?.options?.fontSize || 12,
-                  fontColor: fontColor || currWidgetsDetails?.options?.fontColor || 'black',
-                },
-              };
-            }
-          }
-          return position;
-        });
-
-        const newUpdateSignPos = getPlaceHolder.map((obj) => {
-          if (obj.pageNumber === pageNumber) {
-            return { ...obj, pos: addSignPos };
-          }
-          return obj;
-        });
-        const newUpdateSigner = signerPos.map((obj) => {
-          if (obj.Id === uniqueId) {
-            return { ...obj, placeHolder: newUpdateSignPos };
-          }
-          return obj;
-        });
-        setSignerPos(newUpdateSigner);
-      }
-    }
-    setCurrWidgetsDetails({});
-    setFontSize();
-    setFontColor();
-    handleNameModal();
+  // Update widget data after editing in modal
+  const handleWidgetdefaultdata = (data) => {
+    if (!selectedWidgetId) return;
+    setWidgets((prevWidgets) =>
+      prevWidgets.map((w) => {
+        if (w.id !== selectedWidgetId) return w;
+        // Update the widget's label/value fields
+        return {
+          ...w,
+          text: data.defaultValue || data.name || '',
+          name: data.name,
+          defaultValue: data.defaultValue,
+          status: data.status,
+          hint: data.hint,
+          // Add any other fields you want to update from modal
+        };
+      }),
+    );
+    setIsWidgetNameModal(false);
+    setWidgetModalData(null);
   };
 
   const handleNameModal = () => {
@@ -516,6 +479,10 @@ const CustomizePdfSign = () => {
   const [signaturePosition, setSignaturePosition] = useState(null);
   const [isWidgetNameModal, setIsWidgetNameModal] = useState(false);
   const [widgetModalData, setWidgetModalData] = useState(null);
+  const [isSignatureDialog, setIsSignatureDialog] = useState(false);
+  const [signatureDialogWidgetId, setSignatureDialogWidgetId] = useState(null);
+  const [signatureDialogType, setSignatureDialogType] = useState('');
+  const [signatureDialogValue, setSignatureDialogValue] = useState('');
 
   const signatureLikeWidgets = ['signature', 'initials'];
 
@@ -558,9 +525,28 @@ const CustomizePdfSign = () => {
     setSelectedWidgetId(widgetId);
     const selectedWidget = widgets.find((w) => w.id === widgetId);
     if (selectedWidget) {
-      setWidgetModalData(selectedWidget);
-      setIsWidgetNameModal(true);
+      if (['signature', 'initials'].includes(selectedWidget.type)) {
+        setSignatureDialogWidgetId(widgetId);
+        setSignatureDialogType(selectedWidget.type);
+        setIsSignatureDialog(true);
+      } else {
+        setWidgetModalData(selectedWidget);
+        setIsWidgetNameModal(true);
+      }
     }
+  };
+
+  const handleSignatureDialogSave = (value) => {
+    if (!signatureDialogWidgetId) return;
+    setWidgets((prevWidgets) =>
+      prevWidgets.map((w) =>
+        w.id === signatureDialogWidgetId ? { ...w, defaultValue: value, text: value } : w,
+      ),
+    );
+    setIsSignatureDialog(false);
+    setSignatureDialogWidgetId(null);
+    setSignatureDialogType('');
+    setSignatureDialogValue('');
   };
 
   const handleDownloadPdf = async () => {
@@ -807,6 +793,11 @@ const CustomizePdfSign = () => {
             </div>
           </div>
         </Box>
+        <SignatureDialog
+          open={isSignatureDialog}
+          onClose={() => setIsSignatureDialog(false)}
+          onSave={handleSignatureDialogSave}
+        />
         <WidgetNameModal
           signatureType={signatureType}
           widgetName={widgetName}
