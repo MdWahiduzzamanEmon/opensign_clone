@@ -160,11 +160,12 @@ const DraggableWidget = ({
     () => ({
       type: ItemTypes.WIDGET,
       item: { id, type, left, top },
+      canDrag: !isResizing,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [id, left, top],
+    [id, left, top, isResizing],
   );
 
   const [, drop] = useDrop(
@@ -213,7 +214,6 @@ const DraggableWidget = ({
   };
 
   React.useEffect(() => {
-    if (!isResizing || !resizeDir) return;
     const handleMouseMove = (e: MouseEvent) => {
       let newWidth = startPos.current.width;
       let newHeight = startPos.current.height;
@@ -233,8 +233,10 @@ const DraggableWidget = ({
       setIsResizing(false);
       setResizeDir(null);
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    if (isResizing && resizeDir) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -255,8 +257,8 @@ const DraggableWidget = ({
         minHeight: MIN_HEIGHT,
         maxHeight: MAX_HEIGHT,
         background: 'rgba(199,215,245,0.95)',
-        border: '2.5px dashed #7da7e6',
-        borderRadius: 16,
+        border: '2px dashed #7da7e6',
+        borderRadius: 10,
         boxShadow: '0 2px 12px 0 rgba(33, 150, 243, 0.10)',
         padding: 0,
         zIndex: isDragging ? 1000 : 1,
@@ -277,16 +279,16 @@ const DraggableWidget = ({
       <div
         style={{
           position: 'absolute',
-          top: -20,
-          right: 12,
+          top: -30,
+          right: 0,
           display: 'flex',
           gap: 6,
-          background: '#f8faff',
-          borderRadius: 20,
-          boxShadow: '0 1px 4px 0 #b3c6e6',
+          // background: '#f8faff',
+          // borderRadius: 20,
+          // boxShadow: '0 1px 4px 0 #b3c6e6',
           padding: '2px 12px',
           alignItems: 'center',
-          border: '1.5px solid #b3c6e6',
+          // border: '1.5px solid #b3c6e6',
           height: 32,
         }}
         onClick={(e) => e.stopPropagation()}
